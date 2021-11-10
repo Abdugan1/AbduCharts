@@ -16,15 +16,20 @@ public:
 public slots:
     void onHandleMoved(ResizeHandle* resizeHandle, qreal dx, qreal dy);
 
-protected:
-
 private:
     void updateCompareRect(ResizeHandle* resizeHandle, qreal dx, qreal dy);
     void doResize();
+    void limitResize();
 
 private:
     MyItem* targetResizeItem_ = nullptr;
     QRectF compareRect_;
+    QRectF oldCompareRect_;
+
+    qreal minWidth_  = 0.0f;
+    qreal minHegith_ = 0.0f;
+    qreal maxWidth_  = INFINITY;
+    qreal maxHeight_ = INFINITY;
 };
 
 #endif // ITEMRESIZER_H

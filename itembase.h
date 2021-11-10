@@ -6,6 +6,8 @@
 class ItemBase : public QGraphicsItem
 {
 public:
+    enum { Type = UserType + 1 };
+
     struct Data {
         qreal x = 0.0f;
         qreal y = 0.0f;
@@ -16,6 +18,8 @@ public:
     explicit ItemBase(const Data& data, QGraphicsItem* parent = nullptr);
 
     virtual QRectF contentRect() const = 0;
+
+    int type() const override;
 
     const QMarginsF &margins() const;
     void setMargins(const QMarginsF &newMargins);

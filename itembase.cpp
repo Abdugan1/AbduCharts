@@ -13,6 +13,11 @@ ItemBase::ItemBase(const Data &data, QGraphicsItem *parent)
     applyData(data);
 }
 
+int ItemBase::type() const
+{
+    return Type;
+}
+
 const QMarginsF &ItemBase::margins() const
 {
     return margins_;

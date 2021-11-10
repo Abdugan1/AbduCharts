@@ -14,11 +14,13 @@ ItemResizer::ItemResizer(MyItem *targetResizeItem, QObject *parent)
 void ItemResizer::onHandleMoved(ResizeHandle *resizeHandle, qreal dx, qreal dy)
 {
     updateCompareRect(resizeHandle, dx, dy);
-    doResize();
+    if (compareRect_ != oldCompareRect_)
+        doResize();
 }
 
 void ItemResizer::updateCompareRect(ResizeHandle *resizeHandle, qreal dx, qreal dy)
 {
+    oldCompareRect_ = compareRect_;
     switch (resizeHandle->positionFlags()) {
     case ResizeHandle::TopLeft:
         compareRect_.setTopLeft(QPointF(compareRect_.left() + dx, compareRect_.top() + dy));
@@ -61,12 +63,13 @@ void ItemResizer::doResize()
     qreal dx = compareRect_.x() - targetResizeItem_->contentRect().x();
     qreal dy = compareRect_.y() - targetResizeItem_->contentRect().y();
 
-    qDebug() << "dx:" << dx;
-    qDebug() << "dy:" << dy;
-    qDebug() << "";
-
     targetResizeItem_->moveBy(dx, dy);
 
     compareRect_ = targetResizeItem_->contentRect();
     targetResizeItem_->setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
+}
+
+void ItemResizer::limitResize()
+{
+
 }

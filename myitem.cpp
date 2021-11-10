@@ -2,6 +2,7 @@
 #include "resizehandle.h"
 #include "itemresizer.h"
 
+#include <QStyleOptionGraphicsItem>
 #include <QPainter>
 #include <QDebug>
 
@@ -23,8 +24,10 @@ MyItem::MyItem(QGraphicsItem *parent)
     : ItemBase(parent)
 {
     setFlags(ItemSendsGeometryChanges
-             | ItemIsMovable);
+             | ItemIsMovable
+             | ItemIsSelectable);
     setMargins(QMarginsF(5, 5, 5, 5));
+    setAcceptedMouseButtons(Qt::LeftButton);
 
     QRectF rect(-Width / 2, -Height / 2, Width, Height);
     QPolygonF polygon;
@@ -61,6 +64,11 @@ MyItem::MyItem(QGraphicsItem *parent)
     updateResizeHandlesPositions();
 }
 
+MyItem::~MyItem()
+{
+    qDebug() << "Bye World!";
+}
+
 QRectF MyItem::boundingRect() const
 {
     return contentRect() + margins();
@@ -90,6 +98,7 @@ void MyItem::paint(QPainter *painter,
     painter->setPen(Qt::green);
     painter->drawRect(contentRect());
     painter->setPen(Qt::blue);
+    painter->setBrush(Qt::white);
     painter->drawPath(shape_);
     drawCross(painter, QPointF(0, 0));
 }
@@ -105,8 +114,18 @@ QVariant MyItem::itemChange(GraphicsItemChange change, const QVariant &value)
 {
     if (change == ItemPositionChange) {
         return snapToGrid(value.toPointF(), 20);
+    } else if (change == ItemPositionHasChanged) {
+        emit moved(this);
+    } else if (change == ItemSelectedHasChanged && value.toBool()) {
+        emit selected(this);
     }
     return ItemBase::itemChange(change, value);
+}
+
+void MyItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    emit released();
+    ItemBase::mouseReleaseEvent(event);
 }
 
 void MyItem::updateResizeHandlesPositions()
@@ -153,3 +172,4 @@ void MyItem::updateResizeHandlesPositions()
         }
     }
 }
+

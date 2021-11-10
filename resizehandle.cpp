@@ -14,6 +14,7 @@ ResizeHandle::ResizeHandle(PositionFlags positionFlags, QGraphicsItem *parent)
     , positionFlags_(positionFlags)
 {
     setFlags(ItemIsMovable);
+    setAcceptedMouseButtons(Qt::LeftButton);
 }
 
 QRectF ResizeHandle::boundingRect() const
