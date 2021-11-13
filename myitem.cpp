@@ -95,9 +95,9 @@ void MyItem::paint(QPainter *painter,
 {
     painter->setPen(Qt::red);
     painter->drawRect(boundingRect());
-    painter->setPen(Qt::green);
-    painter->drawRect(contentRect());
     painter->setPen(Qt::blue);
+    painter->drawRect(contentRect());
+    painter->setPen(option->state & QStyle::State_Selected ? Qt::green : Qt::black);
     painter->setBrush(Qt::white);
     painter->drawPath(shape_);
     drawCross(painter, QPointF(0, 0));
@@ -116,8 +116,12 @@ QVariant MyItem::itemChange(GraphicsItemChange change, const QVariant &value)
         return snapToGrid(value.toPointF(), 20);
     } else if (change == ItemPositionHasChanged) {
         emit moved(this);
-    } else if (change == ItemSelectedHasChanged && value.toBool()) {
-        emit selected(this);
+    } else if (change == ItemSelectedHasChanged) {
+        if (value.toBool()) {
+            emit selected(this);
+        } else {
+            emit lostSelection(this);
+        }
     }
     return ItemBase::itemChange(change, value);
 }
@@ -131,7 +135,6 @@ void MyItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 void MyItem::updateResizeHandlesPositions()
 {
     auto setHandlePos = [](ResizeHandle* resizeHandle, const QPointF& pos) {
-        resizeHandle->setPrevPos(pos);
         resizeHandle->setPos(pos);
     };
 

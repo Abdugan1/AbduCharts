@@ -40,16 +40,6 @@ PositionFlags ResizeHandle::positionFlags() const
     return positionFlags_;
 }
 
-QPointF ResizeHandle::prevPos() const
-{
-    return prevPos_;
-}
-
-void ResizeHandle::setPrevPos(QPointF newPrevPos)
-{
-    prevPos_ = newPrevPos;
-}
-
 void ResizeHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
     QPointF oldPos = scenePos();
@@ -58,10 +48,6 @@ void ResizeHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     if (newPos != oldPos) {
         qreal dx = newPos.x() - oldPos.x();
         qreal dy = newPos.y() - oldPos.y();
-//        qDebug() << "oldPos:" << oldPos;
-//        qDebug() << "newPos:" << newPos;
-//        qDebug() << "dx:" << dx;
-//        qDebug() << "dy:" << dy;
         emit moved(this, dx, dy);
     }
 }

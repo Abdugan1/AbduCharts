@@ -28,9 +28,6 @@ public:
 
     PositionFlags positionFlags() const;
 
-    QPointF prevPos() const;
-    void setPrevPos(QPointF newPrevPos);
-
 signals:
     void moved(ResizeHandle* resizeHandle, qreal dx, qreal dy);
 
@@ -42,7 +39,6 @@ private:
 
 private:
     PositionFlags positionFlags_;
-    QPointF prevPos_;
 };
 
 #endif // RESIZEHANDLE_H

@@ -20,9 +20,12 @@ void Scene::addItem(MyItem *item)
 {
     QGraphicsScene::addItem(item);
     items_.append(item);
-    connect(item, &MyItem::moved,    this, &Scene::onItemMoved);
-    connect(item, &MyItem::selected, this, &Scene::bringToFront);
-    connect(item, &MyItem::released, this, &Scene::deleteAllGuidelines);
+    connect(item, &MyItem::moved,           this, &Scene::onItemMoved);
+    connect(item, &MyItem::selected,        this, &Scene::bringToFront);
+    connect(item, &MyItem::released,        this, &Scene::deleteAllGuidelines);
+    connect(item, &MyItem::selected,        this, &Scene::itemSelected);
+    connect(item, &MyItem::moved,           this, &Scene::itemMoved);
+    connect(item, &MyItem::lostSelection,   this, &Scene::itemLostSelection);
 }
 
 void Scene::removeItem(MyItem *item)

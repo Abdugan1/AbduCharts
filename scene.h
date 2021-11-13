@@ -18,6 +18,11 @@ public:
     void addItem(MyItem* item);
     void removeItem(MyItem* item);
 
+signals:
+    void itemSelected(MyItem* item);
+    void itemLostSelection(MyItem* item);
+    void itemMoved(MyItem* item);
+
 private slots:
     void onItemMoved(MyItem* movedItem);
     void bringToFront(MyItem* item);

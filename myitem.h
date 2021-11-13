@@ -24,6 +24,7 @@ public:
 signals:
     void moved(MyItem* item);
     void selected(MyItem* item);
+    void lostSelection(MyItem* item);
     void released();
 
 private slots:
