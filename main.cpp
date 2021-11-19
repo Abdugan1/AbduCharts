@@ -19,6 +19,10 @@ int main(int argc, char *argv[])
 
     MyItem* myItem2 = new MyItem;
     scene->addItem(myItem2);
+
+    MyItem* myItem3 = new MyItem;
+    scene->addItem(myItem3);
+
 //    QTimer::singleShot(2000, [=](){
 //        scene->removeItem(myItem2);
 //    });

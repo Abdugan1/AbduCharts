@@ -6,7 +6,7 @@
 GuideLine::GuideLine(QGraphicsItem *parent)
     : ItemBase(parent)
 {
-    setZValue(-10.0f);
+    setZValue(INFINITY);
 }
 
 PositionLine::PositionLine(const QLineF &line, QGraphicsItem *parent)

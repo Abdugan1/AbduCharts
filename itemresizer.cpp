@@ -14,11 +14,13 @@ ItemResizer::ItemResizer(MyItem *targetResizeItem, QObject *parent)
 void ItemResizer::onHandleMoved(ResizeHandle *resizeHandle, qreal dx, qreal dy)
 {
     updateCompareRect(resizeHandle, dx, dy);
-    if (compareRect_ != oldCompareRect_)
+    if (compareRect_ != oldCompareRect_) {
         doResize();
+        emit resizeBeenMade();
+    }
 }
 
-void ItemResizer::updateCompareRect(ResizeHandle *resizeHandle, qreal dx, qreal dy)
+void ItemResizer::updateCompareRect(const ResizeHandle *resizeHandle, qreal dx, qreal dy)
 {
     oldCompareRect_ = compareRect_;
     switch (resizeHandle->positionFlags()) {

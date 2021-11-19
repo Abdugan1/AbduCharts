@@ -13,11 +13,14 @@ class ItemResizer : public QObject
 public:
     explicit ItemResizer(MyItem* targetResizeItem, QObject *parent = nullptr);
 
+signals:
+    void resizeBeenMade();
+
 public slots:
     void onHandleMoved(ResizeHandle* resizeHandle, qreal dx, qreal dy);
 
 private:
-    void updateCompareRect(ResizeHandle* resizeHandle, qreal dx, qreal dy);
+    void updateCompareRect(const ResizeHandle* resizeHandle, qreal dx, qreal dy);
     void doResize();
     void limitResize();
 

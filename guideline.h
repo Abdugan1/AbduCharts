@@ -2,13 +2,13 @@
 #define GUIDELINE_H
 
 #include "itembase.h"
-#include <QtCore/qglobal.h>
 
 class GuideLine : public ItemBase
 {
 public:
     explicit GuideLine(QGraphicsItem* parent = nullptr);
 };
+
 
 class PositionLine : public GuideLine
 {

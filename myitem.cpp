@@ -1,13 +1,22 @@
 #include "myitem.h"
 #include "resizehandle.h"
 #include "itemresizer.h"
+#include "textitem.h"
 
 #include <QStyleOptionGraphicsItem>
 #include <QPainter>
+#include <QGraphicsSceneMouseEvent>
+#include <QTextDocument>
+#include <QTextCursor>
 #include <QDebug>
 
 constexpr qreal Width  = 200.0f;
 constexpr qreal Height = 80.0f;
+
+int map(int value, int frowLow, int fromHigh, int toLow, int toHigh)
+{
+    return (value - frowLow) * (toHigh - toLow) / (fromHigh - frowLow) + toLow;
+}
 
 void drawCross(QPainter* painter, const QPointF& point)
 {
@@ -45,6 +54,10 @@ MyItem::MyItem(QGraphicsItem *parent)
     shape_.addPolygon(polygon);
 
     resizer_ = new ItemResizer(this);
+    connect(resizer_, &ItemResizer::resizeBeenMade, this, &MyItem::resized);
+
+    textItem_ = new MyTextItem(this);
+    connect(this, &MyItem::lostSelection, textItem_, &MyTextItem::disableTextEditing);
 
     auto addResizeHandle = [this](ResizeHandle::PositionFlags positionFlags) {
         auto resizeHandle = new ResizeHandle(positionFlags, this);
@@ -126,13 +139,35 @@ QVariant MyItem::itemChange(GraphicsItemChange change, const QVariant &value)
     return ItemBase::itemChange(change, value);
 }
 
+void MyItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    if (textEditingEnabled()) {
+        simulateClickOnTextItem(event->pos());
+    }
+    ItemBase::mousePressEvent(event);
+}
+
 void MyItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
     emit released();
     ItemBase::mouseReleaseEvent(event);
 }
 
-void MyItem::updateResizeHandlesPositions()
+void MyItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
+{
+    textItem_->enableTextEditing();
+}
+
+void MyItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+    if (textEditingEnabled()) {
+        selectTextInTextItemOnMoving(event->pos());
+    } else {
+        ItemBase::mouseMoveEvent(event);
+    }
+}
+
+void MyItem::updateResizeHandlesPositions() const
 {
     auto setHandlePos = [](ResizeHandle* resizeHandle, const QPointF& pos) {
         resizeHandle->setPos(pos);
@@ -174,5 +209,58 @@ void MyItem::updateResizeHandlesPositions()
             break;
         }
     }
+}
+
+bool MyItem::textEditingEnabled() const
+{
+    return (textItem_->textInteractionFlags() == Qt::TextEditorInteraction);
+}
+
+void MyItem::simulateClickOnTextItem(const QPointF &clickedPos)
+{
+    int position = getTextCursorPositionByMousePos(clickedPos);
+    QTextCursor cursor = textItem_->textCursor();
+    cursor.setPosition(position);
+    textItem_->setFocus(Qt::MouseFocusReason);
+    textItem_->setTextCursor(cursor);
+}
+
+void MyItem::selectTextInTextItemOnMoving(const QPointF &movedPos)
+{
+    QTextCursor cursor = textItem_->textCursor();
+    int position = getTextCursorPositionByMousePos(movedPos);
+    cursor.setPosition(position, QTextCursor::KeepAnchor);
+    textItem_->setTextCursor(cursor);
+}
+
+int MyItem::getTextCursorPositionByMousePos(const QPointF &mousePos) const
+{
+    QPointF clickPos = mapToItem(textItem_, mousePos);
+    QSizeF textItemSize = textItem_->boundingRect().size();
+    QFontMetrics fontMetrics(textItem_->font());
+    QString text = textItem_->document()->toPlainText();
+
+    int position = 0;
+
+    int y = qMax(0.0, qMin(textItemSize.height(), clickPos.y()));
+    int div = y / fontMetrics.height();
+    int h = div < text.count('\n') ? div : text.count('\n');
+    QStringList strings = text.split('\n');
+    auto itStr = strings.begin();
+    for (int i = 0; i < h; ++i) {
+        static const int delimLength = 1;
+        position += (itStr++)->length() + delimLength;
+    }
+
+    QString str = *itStr;
+    qreal strWidth = fontMetrics.horizontalAdvance(str);
+    qreal strBeginPos = textItemSize.width() / 2 - strWidth / 2;
+
+    int x = qMax(strBeginPos, qMin(double(strWidth) + strBeginPos, clickPos.x()));
+    int l = str.length();
+    if (l != 0)
+        position += map(x, strBeginPos, strWidth + strBeginPos, 0, l);
+
+    return position;
 }
 

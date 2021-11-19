@@ -16,6 +16,7 @@ SOURCES += \
     myitem.cpp \
     resizehandle.cpp \
     scene.cpp \
+    textitem.cpp \
     view.cpp
 
 HEADERS += \
@@ -25,6 +26,7 @@ HEADERS += \
     myitem.h \
     resizehandle.h \
     scene.h \
+    textitem.h \
     view.h
 
 # Default rules for deployment.
