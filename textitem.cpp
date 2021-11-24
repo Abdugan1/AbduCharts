@@ -1,5 +1,5 @@
 #include "textitem.h"
-#include "myitem.h"
+#include "flowchartitems.h"
 
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
@@ -24,33 +24,59 @@ TextItem::~TextItem()
 
 void TextItem::updateAlignment()
 {
-    qDebug() << "Updating :D";
+    QPointF topRightPrev = boundingRect().topRight();
+    setTextWidth(-1);
+    setTextWidth(boundingRect().width());
+    setAlignment(alignment_);
+    QPointF topRight = boundingRect().topRight();
+
+    if (alignment_ & Qt::AlignRight)
+        setPos(pos() + (topRightPrev - topRight));
 }
 
-MyTextItem::MyTextItem(MyItem *parent)
+Qt::Alignment TextItem::alignment() const
+{
+    return alignment_;
+}
+
+void TextItem::setAlignment(Qt::Alignment newAlignment)
+{
+    alignment_ = newAlignment;
+    QTextBlockFormat format;
+    format.setAlignment(newAlignment);
+    QTextCursor cursor = textCursor();
+    int position = textCursor().position();
+    cursor.select(QTextCursor::Document);
+    cursor.mergeBlockFormat(format);
+    cursor.clearSelection();
+    cursor.setPosition(position);
+    setTextCursor(cursor);
+}
+
+FlowchartTextItem::FlowchartTextItem(FlowchartItem *parent)
     : TextItem(parent)
     , myItem_(parent)
 {
-    setHtml("<center>This is a text!</center>");
     centerOnMyItem();
+    setAlignment(Qt::AlignCenter);
 
-    connect(parent, &MyItem::resized, this, &MyTextItem::centerOnMyItem);
-    connect(document(), &QTextDocument::contentsChanged, this, &MyTextItem::centerOnMyItem);
+    connect(parent, &FlowchartItem::resized, this, &FlowchartTextItem::centerOnMyItem);
+    connect(document(), &QTextDocument::contentsChanged, this, &FlowchartTextItem::centerOnMyItem);
 }
 
-MyTextItem::~MyTextItem()
+FlowchartTextItem::~FlowchartTextItem()
 {
     qDebug() << "Bye MyTextItem!";
 }
 
-void MyTextItem::paint(QPainter *painter,
+void FlowchartTextItem::paint(QPainter *painter,
                            const QStyleOptionGraphicsItem *option,
                            QWidget *widget)
 {
     TextItem::paint(painter, option, widget);
 }
 
-void MyTextItem::enableTextEditing()
+void FlowchartTextItem::enableTextEditing()
 {
     acceptMousePress_ = true;
     setTextInteractionFlags(Qt::TextEditorInteraction);
@@ -61,7 +87,7 @@ void MyTextItem::enableTextEditing()
     setTextCursor(cursor);
 }
 
-void MyTextItem::disableTextEditing()
+void FlowchartTextItem::disableTextEditing()
 {
     acceptMousePress_ = false;
     setTextInteractionFlags(Qt::NoTextInteraction);
@@ -71,7 +97,7 @@ void MyTextItem::disableTextEditing()
     clearFocus();
 }
 
-void MyTextItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
+void FlowchartTextItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     qDebug() << "MyTextItem: mousePress";
     if (!acceptMousePress_)
@@ -80,7 +106,7 @@ void MyTextItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
         TextItem::mousePressEvent(event);
 }
 
-void MyTextItem::centerOnMyItem()
+void FlowchartTextItem::centerOnMyItem()
 {
     QRectF textRect   = boundingRect();
     setPos(-textRect.width() / 2, -textRect.height() / 2);

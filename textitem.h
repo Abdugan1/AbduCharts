@@ -6,32 +6,30 @@
 
 class TextItem : public QGraphicsTextItem
 {
+    Q_OBJECT
 public:
-    enum AlignFlags {
-        Left,
-        Center,
-        Right
-    };
-
     explicit TextItem(QGraphicsItem* parent = nullptr);
     ~TextItem();
+
+    Qt::Alignment alignment() const;
+    void setAlignment(Qt::Alignment newAlignment);
 
 private slots:
     void updateAlignment();
 
 private:
-    AlignFlags alignment_ = AlignFlags::Center;
+    Qt::Alignment alignment_;
 };
 
 
+class FlowchartItem;
 
-class MyItem;
-
-class MyTextItem : public TextItem
+class FlowchartTextItem : public TextItem
 {
+    Q_OBJECT
 public:
-    explicit MyTextItem(MyItem* parent = nullptr);
-    ~MyTextItem();
+    explicit FlowchartTextItem(FlowchartItem* parent = nullptr);
+    ~FlowchartTextItem();
 
     void paint(QPainter *painter,
                const QStyleOptionGraphicsItem *option,
@@ -48,7 +46,7 @@ private slots:
     void centerOnMyItem();
 
 private:
-    MyItem* myItem_ = nullptr;
+    FlowchartItem* myItem_ = nullptr;
     bool acceptMousePress_ = false;
 };
 

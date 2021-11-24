@@ -4,7 +4,7 @@
 #include <QGraphicsScene>
 #include <QtCore/qglobal.h>
 
-class MyItem;
+class FlowchartItem;
 class GuideLine;
 class PositionLine;
 
@@ -15,24 +15,24 @@ public:
     explicit Scene(QObject *parent = nullptr);
     explicit Scene(const QRectF& sceneRect, QObject* parent = nullptr);
 
-    void addItem(MyItem* item);
-    void removeItem(MyItem* item);
+    void addItem(FlowchartItem* item);
+    void removeItem(FlowchartItem* item);
 
 signals:
-    void itemSelected(MyItem* item);
-    void itemLostSelection(MyItem* item);
-    void itemMoved(MyItem* item);
+    void itemSelected(FlowchartItem* item);
+    void itemLostSelection(FlowchartItem* item);
+    void itemMoved(FlowchartItem* item);
 
 private slots:
-    void onItemMoved(MyItem* movedItem);
-    void bringToFront(MyItem* item);
+    void onItemMoved(FlowchartItem* movedItem);
+    void bringToFront(FlowchartItem* item);
     void deleteAllGuidelines();
 
 private:
     void addPositionLine(PositionLine* positionLine);
 
 private:
-    QList<MyItem*> items_;
+    QList<FlowchartItem*> items_;
     QList<GuideLine*> guideLines_;
 };
 

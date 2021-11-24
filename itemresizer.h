@@ -5,13 +5,15 @@
 #include <QRectF>
 
 class ResizeHandle;
-class MyItem;
+class FlowchartItem;
 
 class ItemResizer : public QObject
 {
     Q_OBJECT
 public:
-    explicit ItemResizer(MyItem* targetResizeItem, QObject *parent = nullptr);
+    explicit ItemResizer(FlowchartItem* targetResizeItem, QObject *parent = nullptr);
+
+    void setCompareRect(const QRectF &newCompareRect);
 
 signals:
     void resizeBeenMade();
@@ -25,7 +27,7 @@ private:
     void limitResize();
 
 private:
-    MyItem* targetResizeItem_ = nullptr;
+    FlowchartItem* targetResizeItem_ = nullptr;
     QRectF compareRect_;
     QRectF oldCompareRect_;
 

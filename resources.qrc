@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>rsc/img/change_figure.png</file>
+    </qresource>
+</RCC>

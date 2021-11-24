@@ -3,9 +3,11 @@
 
 #include <QGraphicsView>
 
-class QLabel;
 class Scene;
-class MyItem;
+class FlowchartItem;
+
+class QLabel;
+class QToolButton;
 
 class View : public QGraphicsView
 {
@@ -19,6 +21,10 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
 
 private slots:
+    void showAndUpdateItemInfoLabels(FlowchartItem* selectedItem);
+    void hideItemInfoLabels();
+    void updateItemInfoLabels(FlowchartItem* selectedItem);
+
     void scalingTime(qreal x);
     void animFinished();
 
@@ -29,13 +35,21 @@ private:
     void initLayout();
     void initConnection();
 
-    void updateSelectedItemPositionLabel(MyItem* selectedItem);
+    void updateSelectedItemPositionLabel(FlowchartItem* selectedItem);
+    void updateSelectedItemFigureTypeLabel(FlowchartItem* selectedItem);
+
+    void updateCursorPositionLabel(const QPoint& pos);
 
 private:
     Scene* scene_ = nullptr;
 
-    QLabel* cursorPositionLabel_        = nullptr;
-    QLabel* selectedItemPositionLabel_  = nullptr;
+    QLabel* cursorPositionLabel_         = nullptr;
+
+    // Selected item info labels
+    QLabel* selectedItemFigureTypeLabel_ = nullptr;
+    QLabel* selectedItemPositionLabel_   = nullptr;
+
+    QToolButton* changeFlowchartButton_  = nullptr;
 
     int numScheduledScalings_ = 0;
 };

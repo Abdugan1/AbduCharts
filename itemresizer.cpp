@@ -1,14 +1,18 @@
 #include "itemresizer.h"
-#include "myitem.h"
+#include "flowchartitems.h"
 #include "resizehandle.h"
 
 #include <QDebug>
 
-ItemResizer::ItemResizer(MyItem *targetResizeItem, QObject *parent)
+ItemResizer::ItemResizer(FlowchartItem *targetResizeItem, QObject *parent)
     : QObject(parent)
     , targetResizeItem_(targetResizeItem)
-    , compareRect_(targetResizeItem->contentRect())
 {
+}
+
+void ItemResizer::setCompareRect(const QRectF &newCompareRect)
+{
+    compareRect_ = newCompareRect;
 }
 
 void ItemResizer::onHandleMoved(ResizeHandle *resizeHandle, qreal dx, qreal dy)

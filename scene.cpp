@@ -1,5 +1,5 @@
 #include "scene.h"
-#include "myitem.h"
+#include "flowchartitems.h"
 #include "guideline.h"
 
 #include <QDebug>
@@ -16,26 +16,26 @@ Scene::Scene(const QRectF &sceneRect, QObject *parent)
 
 }
 
-void Scene::addItem(MyItem *item)
+void Scene::addItem(FlowchartItem *item)
 {
     QGraphicsScene::addItem(item);
     items_.append(item);
-    connect(item, &MyItem::moved,           this, &Scene::onItemMoved);
-    connect(item, &MyItem::selected,        this, &Scene::bringToFront);
-    connect(item, &MyItem::released,        this, &Scene::deleteAllGuidelines);
-    connect(item, &MyItem::selected,        this, &Scene::itemSelected);
-    connect(item, &MyItem::moved,           this, &Scene::itemMoved);
-    connect(item, &MyItem::lostSelection,   this, &Scene::itemLostSelection);
+    connect(item, &FlowchartItem::moved,           this, &Scene::onItemMoved);
+    connect(item, &FlowchartItem::selected,        this, &Scene::bringToFront);
+    connect(item, &FlowchartItem::released,        this, &Scene::deleteAllGuidelines);
+    connect(item, &FlowchartItem::selected,        this, &Scene::itemSelected);
+    connect(item, &FlowchartItem::moved,           this, &Scene::itemMoved);
+    connect(item, &FlowchartItem::lostSelection,   this, &Scene::itemLostSelection);
 }
 
-void Scene::removeItem(MyItem *item)
+void Scene::removeItem(FlowchartItem *item)
 {
     QGraphicsScene::removeItem(item);
     items_.removeAll(item);
     item->deleteLater();
 }
 
-void Scene::onItemMoved(MyItem *movedItem)
+void Scene::onItemMoved(FlowchartItem *movedItem)
 {
     if (selectedItems().count() > 1)
         return;
@@ -78,7 +78,7 @@ void Scene::onItemMoved(MyItem *movedItem)
     }
 }
 
-void Scene::bringToFront(MyItem *item)
+void Scene::bringToFront(FlowchartItem *item)
 {
     qreal zValue = item->zValue();
     for (const auto i : qAsConst(items_)) {
