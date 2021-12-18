@@ -2,11 +2,13 @@
 #define SCENE_H
 
 #include <QGraphicsScene>
-#include <QtCore/qglobal.h>
 
-class FlowchartItem;
+class FlowchartShapeItem;
 class GuideLine;
 class PositionLine;
+class FlowchartTextItem;
+
+class QTextCharFormat;
 
 class Scene : public QGraphicsScene
 {
@@ -15,24 +17,34 @@ public:
     explicit Scene(QObject *parent = nullptr);
     explicit Scene(const QRectF& sceneRect, QObject* parent = nullptr);
 
-    void addItem(FlowchartItem* item);
-    void removeItem(FlowchartItem* item);
+    void addItem(FlowchartShapeItem* item);
+    void removeItem(FlowchartShapeItem* item);
 
 signals:
-    void itemSelected(FlowchartItem* item);
-    void itemLostSelection(FlowchartItem* item);
-    void itemMoved(FlowchartItem* item);
+    void itemSelected(FlowchartShapeItem* item);
+    void itemLostSelection(FlowchartShapeItem* item);
+    void itemMoved(FlowchartShapeItem* item);
+
+    void currentCharFormatChanged(const QTextCharFormat& format);
+    void switchedToAnotherTextItem(FlowchartTextItem* textItem);
+
+public slots:
+    void applyFormatOnCurrentTextItem(const QTextCharFormat& format);
 
 private slots:
-    void onItemMoved(FlowchartItem* movedItem);
-    void bringToFront(FlowchartItem* item);
+    void onItemMoved(FlowchartShapeItem* movedItem);
+    void bringToFront(FlowchartShapeItem* item);
+
     void deleteAllGuidelines();
 
 private:
     void addPositionLine(PositionLine* positionLine);
 
+    void connectSignalsOfShapeItem(FlowchartShapeItem* item);
+    void connectSignalsOfTextItem(FlowchartTextItem* textItem);
+
 private:
-    QList<FlowchartItem*> items_;
+    QList<FlowchartShapeItem*> flowchartShapeItems_;
     QList<GuideLine*> guideLines_;
 };
 

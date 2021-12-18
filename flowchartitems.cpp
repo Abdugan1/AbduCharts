@@ -26,8 +26,8 @@ void drawCross(QPainter* painter, const QPointF& point)
     painter->restore();
 }
 
-FlowchartItem::FlowchartItem(QGraphicsItem *parent)
-    : ItemBase(parent)
+FlowchartShapeItem::FlowchartShapeItem(QGraphicsItem *parent)
+    : ShapeItemBase(parent)
 {
     setFlags(ItemSendsGeometryChanges
              | ItemIsMovable
@@ -36,10 +36,10 @@ FlowchartItem::FlowchartItem(QGraphicsItem *parent)
     setAcceptedMouseButtons(Qt::LeftButton);
 
     resizer_ = new ItemResizer(this);
-    connect(resizer_, &ItemResizer::resizeBeenMade, this, &FlowchartItem::resized);
+    connect(resizer_, &ItemResizer::resizeBeenMade, this, &FlowchartShapeItem::resized);
 
-    textItem_ = new FlowchartTextItem(this);
-    connect(this, &FlowchartItem::lostSelection, textItem_, &FlowchartTextItem::disableTextEditing);
+    textItem_ = new FlowchartShapesTextItem(this);
+    connect(this, &FlowchartShapeItem::lostSelection, textItem_, &FlowchartShapesTextItem::disableTextEditingAndMousePress);
 
     addResizeHandle(ResizeHandle::TopLeft    );
     addResizeHandle(ResizeHandle::Top        );
@@ -51,32 +51,32 @@ FlowchartItem::FlowchartItem(QGraphicsItem *parent)
     addResizeHandle(ResizeHandle::BottomRight);
 }
 
-FlowchartItem::~FlowchartItem()
+FlowchartShapeItem::~FlowchartShapeItem()
 {
     qDebug() << "Bye World!";
 }
 
-QRectF FlowchartItem::boundingRect() const
+QRectF FlowchartShapeItem::boundingRect() const
 {
     return contentRect() + margins();
 }
 
-QRectF FlowchartItem::contentRect() const
+QRectF FlowchartShapeItem::contentRect() const
 {
     return shape_.boundingRect();
 }
 
-QPainterPath FlowchartItem::shape() const
+QPainterPath FlowchartShapeItem::shape() const
 {
     return shape_;
 }
 
-void FlowchartItem::setShape(const QPainterPath &shape)
+void FlowchartShapeItem::setShape(const QPainterPath &shape)
 {
     shape_ = shape;
 }
 
-void FlowchartItem::paint(QPainter *painter,
+void FlowchartShapeItem::paint(QPainter *painter,
                    const QStyleOptionGraphicsItem *option,
                    QWidget *widget)
 {
@@ -90,24 +90,24 @@ void FlowchartItem::paint(QPainter *painter,
     drawCross(painter, QPointF(0, 0));
 }
 
-void FlowchartItem::setText(const QString &text)
+void FlowchartShapeItem::setText(const QString &text)
 {
     textItem_->setPlainText(text);
 }
 
-void FlowchartItem::setTextAlignment(Qt::Alignment alignment)
+void FlowchartShapeItem::setTextAlignment(Qt::Alignment alignment)
 {
     textItem_->setAlignment(alignment);
 }
 
-void FlowchartItem::onResizeHandleMoved(ResizeHandle *resizeHandle, qreal dx, qreal dy)
+void FlowchartShapeItem::onResizeHandleMoved(ResizeHandle *resizeHandle, qreal dx, qreal dy)
 {
     prepareGeometryChange();
     resizer_->onHandleMoved(resizeHandle, dx, dy);
     updateResizeHandlesPositions();
 }
 
-QVariant FlowchartItem::itemChange(GraphicsItemChange change, const QVariant &value)
+QVariant FlowchartShapeItem::itemChange(GraphicsItemChange change, const QVariant &value)
 {
     if (change == ItemPositionChange) {
         return snapToGrid(value.toPointF(), 20);
@@ -120,45 +120,36 @@ QVariant FlowchartItem::itemChange(GraphicsItemChange change, const QVariant &va
             emit lostSelection(this);
         }
     }
-    return ItemBase::itemChange(change, value);
+    return ShapeItemBase::itemChange(change, value);
 }
 
-void FlowchartItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
+void FlowchartShapeItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (textEditingEnabled()) {
-        simulateClickOnTextItem(event->pos());
-    }
-    ItemBase::mousePressEvent(event);
+    if (textEditingEnabled())
+        textItem_->disableTextEditingAndMousePress();
+
+    ShapeItemBase::mousePressEvent(event);
 }
 
-void FlowchartItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+void FlowchartShapeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
     emit released();
-    ItemBase::mouseReleaseEvent(event);
+    ShapeItemBase::mouseReleaseEvent(event);
 }
 
-void FlowchartItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
+void FlowchartShapeItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
-    textItem_->enableTextEditing();
+    textItem_->enableTextEditingAndMousePress();
 }
 
-void FlowchartItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
-{
-    if (textEditingEnabled()) {
-        selectTextInTextItemOnMoving(event->pos());
-    } else {
-        ItemBase::mouseMoveEvent(event);
-    }
-}
-
-void FlowchartItem::addResizeHandle(ResizeHandle::PositionFlags positionFlags)
+void FlowchartShapeItem::addResizeHandle(ResizeHandle::PositionFlags positionFlags)
 {
     auto resizeHandle = new ResizeHandle(positionFlags, this);
-    connect(resizeHandle, &ResizeHandle::moved, this, &FlowchartItem::onResizeHandleMoved);
+    connect(resizeHandle, &ResizeHandle::moved, this, &FlowchartShapeItem::onResizeHandleMoved);
     resizeHandles_.append(resizeHandle);
 }
 
-void FlowchartItem::updateResizeHandlesPositions() const
+void FlowchartShapeItem::updateResizeHandlesPositions() const
 {
     auto setHandlePos = [](ResizeHandle* resizeHandle, const QPointF& pos) {
         resizeHandle->setPos(pos);
@@ -202,73 +193,29 @@ void FlowchartItem::updateResizeHandlesPositions() const
     }
 }
 
-void FlowchartItem::initShape_SetResizerRect_UpdateHandlePositions(const QPainterPath &shape)
+void FlowchartShapeItem::initShape_SetResizerRect_UpdateHandlePositions(const QPainterPath &shape)
 {
     setShape(shape);
     resizer_->setCompareRect(contentRect());
     updateResizeHandlesPositions();
 }
 
-bool FlowchartItem::textEditingEnabled() const
+bool FlowchartShapeItem::textEditingEnabled() const
 {
     return (textItem_->textInteractionFlags() == Qt::TextEditorInteraction);
 }
 
-void FlowchartItem::simulateClickOnTextItem(const QPointF &clickedPos)
+FlowchartShapesTextItem *FlowchartShapeItem::textItem() const
 {
-    int position = getTextCursorPositionByMousePos(clickedPos);
-    QTextCursor cursor = textItem_->textCursor();
-    cursor.setPosition(position);
-    textItem_->setFocus(Qt::MouseFocusReason);
-    textItem_->setTextCursor(cursor);
+    return textItem_;
 }
-
-void FlowchartItem::selectTextInTextItemOnMoving(const QPointF &movedPos)
-{
-    QTextCursor cursor = textItem_->textCursor();
-    int position = getTextCursorPositionByMousePos(movedPos);
-    cursor.setPosition(position, QTextCursor::KeepAnchor);
-    textItem_->setTextCursor(cursor);
-}
-
-int FlowchartItem::getTextCursorPositionByMousePos(const QPointF &mousePos) const
-{
-    QPointF clickPos = mapToItem(textItem_, mousePos);
-    QSizeF textItemSize = textItem_->boundingRect().size();
-    QFontMetrics fontMetrics(textItem_->font());
-    QString text = textItem_->document()->toPlainText();
-
-    int position = 0;
-
-    int y = qMax(0.0, qMin(textItemSize.height(), clickPos.y()));
-    int div = y / fontMetrics.height();
-    int h = div < text.count('\n') ? div : text.count('\n');
-    QStringList strings = text.split('\n');
-    auto itStr = strings.begin();
-    for (int i = 0; i < h; ++i) {
-        static const int delimLength = 1;
-        position += (itStr++)->length() + delimLength;
-    }
-
-    QString str = *itStr;
-    qreal strWidth = fontMetrics.horizontalAdvance(str);
-    qreal strBeginPos = textItemSize.width() / 2 - strWidth / 2;
-
-    int x = qMax(strBeginPos, qMin(double(strWidth) + strBeginPos, clickPos.x()));
-    int l = str.length();
-    if (l != 0)
-        position += map(x, strBeginPos, strWidth + strBeginPos, 0, l);
-
-    return position;
-}
-
 
 //------------------------------------------------
 //                Terminal
 //------------------------------------------------
 
 Terminal::Terminal(QGraphicsItem *parent)
-    : FlowchartItem(parent)
+    : FlowchartShapeItem(parent)
 {
     QRectF rect(-Width / 2, -Height / 2, Width, Height);
     QPainterPath shape;
@@ -288,7 +235,7 @@ QString Terminal::figureType() const
 //------------------------------------------------
 
 Process::Process(QGraphicsItem *parent)
-    : FlowchartItem(parent)
+    : FlowchartShapeItem(parent)
 {
     QRectF rect(-Width / 2, -Height / 2, Width, Height);
     QPainterPath shape;
@@ -307,7 +254,7 @@ QString Process::figureType() const
 //------------------------------------------------
 
 Decision::Decision(QGraphicsItem *parent)
-    : FlowchartItem(parent)
+    : FlowchartShapeItem(parent)
 {
     QRectF rect(-Width / 2, -Height / 2, Width, Height);
     QPolygonF polygon;
@@ -336,7 +283,7 @@ QString Decision::figureType() const
 //------------------------------------------------
 
 InOut::InOut(QGraphicsItem *parent)
-    : FlowchartItem(parent)
+    : FlowchartShapeItem(parent)
 {
     QRectF rect(-Width / 2, -Height / 2, Width, Height);
     QPolygonF polygon;

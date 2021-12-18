@@ -2,33 +2,33 @@
 
 #include <QGraphicsSceneMouseEvent>
 
-ItemBase::ItemBase(QGraphicsItem *parent)
+ShapeItemBase::ShapeItemBase(QGraphicsItem *parent)
     : QGraphicsItem(parent)
 {
 }
 
-ItemBase::ItemBase(const Data &data, QGraphicsItem *parent)
+ShapeItemBase::ShapeItemBase(const Data &data, QGraphicsItem *parent)
     : QGraphicsItem(parent)
 {
     applyData(data);
 }
 
-int ItemBase::type() const
+int ShapeItemBase::type() const
 {
     return Type;
 }
 
-const QMarginsF &ItemBase::margins() const
+const QMarginsF &ShapeItemBase::margins() const
 {
     return margins_;
 }
 
-void ItemBase::setMargins(const QMarginsF &newMargins)
+void ShapeItemBase::setMargins(const QMarginsF &newMargins)
 {
     margins_ = newMargins;
 }
 
-void ItemBase::applyData(const Data &data)
+void ShapeItemBase::applyData(const Data &data)
 {
     setPos(data.x, data.y);
     margins_ = data.margins;

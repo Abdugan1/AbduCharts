@@ -4,7 +4,7 @@
 #include <QDebug>
 
 GuideLine::GuideLine(QGraphicsItem *parent)
-    : ItemBase(parent)
+    : ShapeItemBase(parent)
 {
     setZValue(INFINITY);
 }

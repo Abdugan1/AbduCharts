@@ -5,9 +5,11 @@
 #include "resizehandle.h"
 
 class ItemResizer;
-class FlowchartTextItem;
+class FlowchartShapesTextItem;
 
-class FlowchartItem : public QObject, public ItemBase
+class QTextCharFormat;
+
+class FlowchartShapeItem : public QObject, public ShapeItemBase
 {
     Q_OBJECT
 public:
@@ -16,8 +18,8 @@ public:
         Height = 80
     };
 
-    explicit FlowchartItem(QGraphicsItem* parent = nullptr);
-    ~FlowchartItem();
+    explicit FlowchartShapeItem(QGraphicsItem* parent = nullptr);
+    ~FlowchartShapeItem();
 
     QRectF boundingRect() const override;
     QRectF contentRect()  const override;
@@ -35,11 +37,13 @@ public:
 
     void setTextAlignment(Qt::Alignment alignment);
 
+    FlowchartShapesTextItem *textItem() const;
+
 signals:
-    void moved(FlowchartItem* item);
+    void moved(FlowchartShapeItem* item);
     void resized();
-    void selected(FlowchartItem* item);
-    void lostSelection(FlowchartItem* item);
+    void selected(FlowchartShapeItem* item);
+    void lostSelection(FlowchartShapeItem* item);
     void released();
 
 private slots:
@@ -51,7 +55,6 @@ protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *event)       override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event)     override;
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
-    void mouseMoveEvent(QGraphicsSceneMouseEvent *event)        override;
 
     void addResizeHandle(ResizeHandle::PositionFlags positionFlags);
     void updateResizeHandlesPositions() const;
@@ -60,23 +63,20 @@ protected:
 
 private:
     bool textEditingEnabled() const;
-    void simulateClickOnTextItem(const QPointF& clickedPos);
-    void selectTextInTextItemOnMoving(const QPointF& movedPos);
-    int getTextCursorPositionByMousePos(const QPointF& mousePos) const;
 
 private:
     QList<ResizeHandle*> resizeHandles_;
     QPainterPath shape_;
     ItemResizer* resizer_ = nullptr;
 
-    FlowchartTextItem* textItem_ = nullptr;
+    FlowchartShapesTextItem* textItem_ = nullptr;
 };
 
 //------------------------------------------------
 //                Terminal
 //------------------------------------------------
 
-class Terminal : public FlowchartItem
+class Terminal : public FlowchartShapeItem
 {
     Q_OBJECT
 public:
@@ -88,7 +88,7 @@ public:
 //                Process
 //------------------------------------------------
 
-class Process : public FlowchartItem
+class Process : public FlowchartShapeItem
 {
     Q_OBJECT
 public:
@@ -100,7 +100,7 @@ public:
 //                Decision
 //------------------------------------------------
 
-class Decision : public FlowchartItem
+class Decision : public FlowchartShapeItem
 {
     Q_OBJECT
 public:
@@ -112,7 +112,7 @@ public:
 //                InOut
 //------------------------------------------------
 
-class InOut : public FlowchartItem
+class InOut : public FlowchartShapeItem
 {
     Q_OBJECT
 public:

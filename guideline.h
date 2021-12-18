@@ -3,7 +3,7 @@
 
 #include "itembase.h"
 
-class GuideLine : public ItemBase
+class GuideLine : public ShapeItemBase
 {
 public:
     explicit GuideLine(QGraphicsItem* parent = nullptr);

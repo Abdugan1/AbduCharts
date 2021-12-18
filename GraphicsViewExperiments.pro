@@ -14,9 +14,11 @@ SOURCES += \
     itembase.cpp \
     itemresizer.cpp \
     main.cpp \
+    mainwindow.cpp \
     resizehandle.cpp \
     scene.cpp \
     textitem.cpp \
+    uppertoolbar.cpp \
     view.cpp
 
 HEADERS += \
@@ -24,9 +26,11 @@ HEADERS += \
     guideline.h \
     itembase.h \
     itemresizer.h \
+    mainwindow.h \
     resizehandle.h \
     scene.h \
     textitem.h \
+    uppertoolbar.h \
     view.h
 
 # Default rules for deployment.
@@ -34,5 +38,4 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-RESOURCES += \
-    resources.qrc
+RESOURCES +=

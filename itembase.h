@@ -3,7 +3,7 @@
 
 #include <QGraphicsItem>
 
-class ItemBase : public QGraphicsItem
+class ShapeItemBase : public QGraphicsItem
 {
 public:
     enum { Type = UserType + 1 };
@@ -14,8 +14,8 @@ public:
         QMargins margins;
     };
 
-    explicit ItemBase(QGraphicsItem* parent = nullptr);
-    explicit ItemBase(const Data& data, QGraphicsItem* parent = nullptr);
+    explicit ShapeItemBase(QGraphicsItem* parent = nullptr);
+    explicit ShapeItemBase(const Data& data, QGraphicsItem* parent = nullptr);
 
     virtual QRectF contentRect() const = 0;
 

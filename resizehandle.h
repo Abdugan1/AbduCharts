@@ -3,7 +3,7 @@
 
 #include "itembase.h"
 
-class ResizeHandle : public QObject, public ItemBase
+class ResizeHandle : public QObject, public ShapeItemBase
 {
     Q_OBJECT
 public:

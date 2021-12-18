@@ -1,7 +1,9 @@
 #include "scene.h"
 #include "flowchartitems.h"
+#include "textitem.h"
 #include "guideline.h"
 
+#include <QTextCharFormat>
 #include <QDebug>
 
 Scene::Scene(QObject *parent)
@@ -16,26 +18,31 @@ Scene::Scene(const QRectF &sceneRect, QObject *parent)
 
 }
 
-void Scene::addItem(FlowchartItem *item)
+void Scene::addItem(FlowchartShapeItem *item)
 {
     QGraphicsScene::addItem(item);
-    items_.append(item);
-    connect(item, &FlowchartItem::moved,           this, &Scene::onItemMoved);
-    connect(item, &FlowchartItem::selected,        this, &Scene::bringToFront);
-    connect(item, &FlowchartItem::released,        this, &Scene::deleteAllGuidelines);
-    connect(item, &FlowchartItem::selected,        this, &Scene::itemSelected);
-    connect(item, &FlowchartItem::moved,           this, &Scene::itemMoved);
-    connect(item, &FlowchartItem::lostSelection,   this, &Scene::itemLostSelection);
+    flowchartShapeItems_.append(item);
+
+    connectSignalsOfShapeItem(item);
+    connectSignalsOfTextItem(item->textItem());
 }
 
-void Scene::removeItem(FlowchartItem *item)
+void Scene::removeItem(FlowchartShapeItem *item)
 {
     QGraphicsScene::removeItem(item);
-    items_.removeAll(item);
+    flowchartShapeItems_.removeAll(item);
     item->deleteLater();
 }
 
-void Scene::onItemMoved(FlowchartItem *movedItem)
+void Scene::applyFormatOnCurrentTextItem(const QTextCharFormat &format)
+{
+    QGraphicsItem* focusItem = this->focusItem();
+    if (auto textItem = qgraphicsitem_cast<FlowchartTextItem*>(focusItem)) {
+        textItem->mergeTextFormat(format);
+    }
+}
+
+void Scene::onItemMoved(FlowchartShapeItem *movedItem)
 {
     if (selectedItems().count() > 1)
         return;
@@ -49,7 +56,7 @@ void Scene::onItemMoved(FlowchartItem *movedItem)
 
     QPointF horizontalBegin = movedItemPos;
     QPointF horizontalEnd   = movedItemPos;
-    for (const auto& item : qAsConst(items_)) {
+    for (const auto& item : qAsConst(flowchartShapeItems_)) {
         QPointF currentItemPos = item->pos();
 
         // x
@@ -78,10 +85,10 @@ void Scene::onItemMoved(FlowchartItem *movedItem)
     }
 }
 
-void Scene::bringToFront(FlowchartItem *item)
+void Scene::bringToFront(FlowchartShapeItem *item)
 {
     qreal zValue = item->zValue();
-    for (const auto i : qAsConst(items_)) {
+    for (const auto i : qAsConst(flowchartShapeItems_)) {
         zValue = qMax(zValue, i->zValue());
     }
     item->setZValue(zValue + 0.1);
@@ -100,6 +107,25 @@ void Scene::addPositionLine(PositionLine *positionLine)
 {
     QGraphicsScene::addItem(positionLine);
     guideLines_.append(positionLine);
+}
+
+void Scene::connectSignalsOfShapeItem(FlowchartShapeItem *item)
+{
+    connect(item, &FlowchartShapeItem::moved,           this, &Scene::onItemMoved);
+    connect(item, &FlowchartShapeItem::selected,        this, &Scene::bringToFront);
+    connect(item, &FlowchartShapeItem::released,        this, &Scene::deleteAllGuidelines);
+    connect(item, &FlowchartShapeItem::selected,        this, &Scene::itemSelected);
+    connect(item, &FlowchartShapeItem::moved,           this, &Scene::itemMoved);
+    connect(item, &FlowchartShapeItem::lostSelection,   this, &Scene::itemLostSelection);
+}
+
+void Scene::connectSignalsOfTextItem(FlowchartTextItem *textItem)
+{
+    connect(textItem, &FlowchartTextItem::currentCharFormatChanged,
+            this,     &Scene::currentCharFormatChanged);
+
+    connect(textItem, &FlowchartTextItem::enabled,
+            this,     &Scene::switchedToAnotherTextItem);
 }
 
 

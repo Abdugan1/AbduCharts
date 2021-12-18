@@ -2,27 +2,31 @@
 #include "flowchartitems.h"
 
 #include <QGraphicsSceneMouseEvent>
+#include <QKeyEvent>
 #include <QPainter>
 #include <QTextDocument>
 #include <QTextCursor>
+#include <QCursor>
 #include <QDebug>
 
-TextItem::TextItem(QGraphicsItem *parent)
+QTextCharFormat FlowchartTextItem::futureItemsFormat_ = QTextCharFormat();
+
+FlowchartTextItem::FlowchartTextItem(QGraphicsItem *parent)
     : QGraphicsTextItem(parent)
 {
-    setFont(QFont("Times New Roman", 14));
+    futureItemsFormat_.setFontFamily("Arial");
+    futureItemsFormat_.setFontPointSize(20);
 
     connect(document(), &QTextDocument::contentsChange,
-            this,       &TextItem::updateAlignment);
-
+            this,       &FlowchartTextItem::updateAlignment);
 }
 
-TextItem::~TextItem()
+FlowchartTextItem::~FlowchartTextItem()
 {
     qDebug() << "Bye TextItem!";
 }
 
-void TextItem::updateAlignment()
+void FlowchartTextItem::updateAlignment()
 {
     QPointF topRightPrev = boundingRect().topRight();
     setTextWidth(-1);
@@ -34,12 +38,76 @@ void TextItem::updateAlignment()
         setPos(pos() + (topRightPrev - topRight));
 }
 
-Qt::Alignment TextItem::alignment() const
+void FlowchartTextItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    QGraphicsTextItem::mousePressEvent(event);
+    emitCurrentCharFormatChangedIfNecessary();
+}
+
+void FlowchartTextItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+    QGraphicsTextItem::mouseMoveEvent(event);
+
+    emitCurrentCharFormatChangedIfNecessary();
+}
+
+void FlowchartTextItem::keyPressEvent(QKeyEvent *event)
+{
+    QGraphicsTextItem::keyPressEvent(event);
+
+    if (isKeyThatCanChangeCursorPositionPressed(event)) {
+        emitCurrentCharFormatChangedIfNecessary();
+    }
+}
+
+bool FlowchartTextItem::isKeyThatCanChangeCursorPositionPressed(QKeyEvent *event) const
+{
+    return (isArrowKeyPressed(event->key())
+            || (event->modifiers() == Qt::CTRL && event->key() == Qt::Key_A)
+            || (event->key() == Qt::Key_Home)
+            || (event->key() == Qt::Key_End));
+}
+
+bool FlowchartTextItem::isArrowKeyPressed(int key) const
+{
+    return (key == Qt::Key_Left  || key == Qt::Key_Right
+            || key == Qt::Key_Up || key == Qt::Key_Down);
+}
+
+void FlowchartTextItem::mergeTextFormatToSelection(QTextCursor *cursor, const QTextCharFormat &format)
+{
+    cursor->mergeCharFormat(format);
+}
+
+void FlowchartTextItem::mergeTextFormatToWordUnderCursor(QTextCursor *cursor, const QTextCharFormat &format)
+{
+    QTextCursor temp = *cursor;
+    cursor->select(QTextCursor::WordUnderCursor);
+    if (cursor->selectedText().isEmpty()) {
+        cursor->swap(temp);
+        cursor->mergeCharFormat(format);
+    } else {
+        int prevPos = cursor->position();
+        cursor->mergeCharFormat(lastCharFormat_);
+        cursor->clearSelection();
+        cursor->setPosition(prevPos);
+    }
+}
+
+void FlowchartTextItem::emitCurrentCharFormatChangedIfNecessary()
+{
+    if (lastCharFormat_ != textCursor().charFormat()) {
+        lastCharFormat_ = textCursor().charFormat();
+        emit currentCharFormatChanged(lastCharFormat_);
+    }
+}
+
+Qt::Alignment FlowchartTextItem::alignment() const
 {
     return alignment_;
 }
 
-void TextItem::setAlignment(Qt::Alignment newAlignment)
+void FlowchartTextItem::setAlignment(Qt::Alignment newAlignment)
 {
     alignment_ = newAlignment;
     QTextBlockFormat format;
@@ -53,61 +121,129 @@ void TextItem::setAlignment(Qt::Alignment newAlignment)
     setTextCursor(cursor);
 }
 
-FlowchartTextItem::FlowchartTextItem(FlowchartItem *parent)
-    : TextItem(parent)
-    , myItem_(parent)
+void FlowchartTextItem::mergeTextFormat(const QTextCharFormat &format)
 {
-    centerOnMyItem();
-    setAlignment(Qt::AlignCenter);
+    lastCharFormat_.merge(format);
+    setTextFormatForAllFutureItems(format);
 
-    connect(parent, &FlowchartItem::resized, this, &FlowchartTextItem::centerOnMyItem);
-    connect(document(), &QTextDocument::contentsChanged, this, &FlowchartTextItem::centerOnMyItem);
+    QTextCursor cursor = textCursor();
+    if (cursor.hasSelection()) {
+        mergeTextFormatToSelection(&cursor, format);
+    } else {
+        mergeTextFormatToWordUnderCursor(&cursor, format);
+    }
+
+    setTextCursor(cursor);
 }
 
-FlowchartTextItem::~FlowchartTextItem()
+void FlowchartTextItem::setTextFormatForAllFutureItems(const QTextCharFormat &format)
 {
-    qDebug() << "Bye MyTextItem!";
+    futureItemsFormat_ = format;
 }
 
-void FlowchartTextItem::paint(QPainter *painter,
-                           const QStyleOptionGraphicsItem *option,
-                           QWidget *widget)
+void FlowchartTextItem::setTextCursor(const QTextCursor &cursor)
 {
-    TextItem::paint(painter, option, widget);
+    QGraphicsTextItem::setTextCursor(cursor);
+    emitCurrentCharFormatChangedIfNecessary();
 }
 
 void FlowchartTextItem::enableTextEditing()
 {
-    acceptMousePress_ = true;
     setTextInteractionFlags(Qt::TextEditorInteraction);
     setFocus(Qt::MouseFocusReason);
     setSelected(true);
     QTextCursor cursor = textCursor();
     cursor.select(QTextCursor::Document);
     setTextCursor(cursor);
+
+    setCursor(Qt::IBeamCursor);
+
+    emit enabled(this);
 }
 
 void FlowchartTextItem::disableTextEditing()
 {
-    acceptMousePress_ = false;
     setTextInteractionFlags(Qt::NoTextInteraction);
     QTextCursor cursor = textCursor();
     cursor.clearSelection();
     setTextCursor(cursor);
     clearFocus();
+
+    setCursor(Qt::ArrowCursor);
+
+    emit disabled(this);
 }
 
-void FlowchartTextItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
+
+//----------------------------------------------------------------
+//                  FlowchartShapesTextItem
+//----------------------------------------------------------------
+
+
+FlowchartShapesTextItem::FlowchartShapesTextItem(FlowchartShapeItem *parent)
+    : FlowchartTextItem(parent)
+    , myItem_(parent)
+{
+    centerOnMyItem();
+    setAlignment(Qt::AlignCenter);
+
+    connect(parent, &FlowchartShapeItem::resized, this, &FlowchartShapesTextItem::centerOnMyItem);
+    connect(document(), &QTextDocument::contentsChanged, this, &FlowchartShapesTextItem::centerOnMyItem);
+}
+
+FlowchartShapesTextItem::~FlowchartShapesTextItem()
+{
+    qDebug() << "Bye MyTextItem!";
+}
+
+void FlowchartShapesTextItem::paint(QPainter *painter,
+                           const QStyleOptionGraphicsItem *option,
+                           QWidget *widget)
+{
+    FlowchartTextItem::paint(painter, option, widget);
+}
+
+void FlowchartShapesTextItem::enableTextEditingAndMousePress()
+{
+    acceptMousePress_ = true;
+    enableTextEditing();
+}
+
+void FlowchartShapesTextItem::disableTextEditingAndMousePress()
+{
+    acceptMousePress_ = false;
+    disableTextEditing();
+}
+
+void FlowchartShapesTextItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     qDebug() << "MyTextItem: mousePress";
-    if (!acceptMousePress_)
+    if (!acceptMousePress_) {
         event->ignore();
-    else
-        TextItem::mousePressEvent(event);
+    } else {
+        FlowchartTextItem::mousePressEvent(event);
+    }
 }
 
-void FlowchartTextItem::centerOnMyItem()
+void FlowchartShapesTextItem::centerOnMyItem()
 {
-    QRectF textRect   = boundingRect();
-    setPos(-textRect.width() / 2, -textRect.height() / 2);
+    setPos(-boundingRect().width() / 2, -boundingRect().height() / 2);
+}
+
+
+//----------------------------------------------------------------
+//                  TextItem
+//----------------------------------------------------------------
+
+
+TextItem::TextItem(QGraphicsItem *parent)
+    : FlowchartTextItem(parent)
+{
+    setPlainText("Im a TextItem!!!");
+}
+
+void TextItem::focusOutEvent(QFocusEvent *event)
+{
+    qDebug() << "focusOutEvent";
+    FlowchartTextItem::focusOutEvent(event);
 }

@@ -10,7 +10,7 @@ constexpr qreal Width  = 8.0f;
 constexpr qreal Height = 8.0f;
 
 ResizeHandle::ResizeHandle(PositionFlags positionFlags, QGraphicsItem *parent)
-    : ItemBase(parent)
+    : ShapeItemBase(parent)
     , positionFlags_(positionFlags)
 {
     setFlags(ItemIsMovable);

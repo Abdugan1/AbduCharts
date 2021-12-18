@@ -71,7 +71,7 @@ void View::mouseMoveEvent(QMouseEvent *event)
     QGraphicsView::mouseMoveEvent(event);
 }
 
-void View::showAndUpdateItemInfoLabels(FlowchartItem *selectedItem)
+void View::showAndUpdateItemInfoLabels(FlowchartShapeItem *selectedItem)
 {
     selectedItemPositionLabel_->show();
     selectedItemFigureTypeLabel_->show();
@@ -84,7 +84,7 @@ void View::hideItemInfoLabels()
     selectedItemFigureTypeLabel_->hide();
 }
 
-void View::updateItemInfoLabels(FlowchartItem *selectedItem)
+void View::updateItemInfoLabels(FlowchartShapeItem *selectedItem)
 {
     updateSelectedItemFigureTypeLabel(selectedItem);
     updateSelectedItemPositionLabel(selectedItem);
@@ -176,13 +176,13 @@ void View::initConnection()
     connect(scene_, &Scene::itemLostSelection, this, &View::hideItemInfoLabels);
 }
 
-void View::updateSelectedItemPositionLabel(FlowchartItem *selectedItem)
+void View::updateSelectedItemPositionLabel(FlowchartShapeItem *selectedItem)
 {
     QPointF pos = selectedItem->pos();
     selectedItemPositionLabel_->setText(SelectedItemPositionText.arg(pos.x()).arg(pos.y()));
 }
 
-void View::updateSelectedItemFigureTypeLabel(FlowchartItem *selectedItem)
+void View::updateSelectedItemFigureTypeLabel(FlowchartShapeItem *selectedItem)
 {
     selectedItemFigureTypeLabel_->setText(SelectedItemFigureTypeText.arg(selectedItem->figureType()));
 }

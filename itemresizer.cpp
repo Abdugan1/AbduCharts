@@ -4,7 +4,7 @@
 
 #include <QDebug>
 
-ItemResizer::ItemResizer(FlowchartItem *targetResizeItem, QObject *parent)
+ItemResizer::ItemResizer(FlowchartShapeItem *targetResizeItem, QObject *parent)
     : QObject(parent)
     , targetResizeItem_(targetResizeItem)
 {
