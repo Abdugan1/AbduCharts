@@ -1,6 +1,8 @@
 #include "view.h"
 #include "scene.h"
 #include "flowchartitems.h"
+#include "shapeitemdrag.h"
+#include "textitem.h"
 
 #include <QWheelEvent>
 #include <QTimeLine>
@@ -71,6 +73,49 @@ void View::mouseMoveEvent(QMouseEvent *event)
     QGraphicsView::mouseMoveEvent(event);
 }
 
+void View::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    QGraphicsView::mouseDoubleClickEvent(event);
+    if (itemAt(event->pos()) == nullptr) {
+        TextItem* textItem = new TextItem;
+        textItem->setPos(mapToScene(event->pos()) - textItem->boundingRect().center());
+        scene_->addItem(textItem);
+        textItem->enableTextEditing();
+    }
+}
+
+void View::dragEnterEvent(QDragEnterEvent *event)
+{
+    if (event->mimeData()->hasFormat(ShapeItemMimeData::mimeType()))
+        event->acceptProposedAction();
+}
+
+void View::dragMoveEvent(QDragMoveEvent *event)
+{
+    event->acceptProposedAction();
+}
+
+void View::dropEvent(QDropEvent *event)
+{
+    const auto* shapeItemMimeData = qobject_cast<const ShapeItemMimeData*>(event->mimeData());
+    if (shapeItemMimeData) {
+        FlowchartShapeItem* item = nullptr;
+        if (shapeItemMimeData->figureType() == "Terminal") {
+            item = new Terminal;
+        } else if (shapeItemMimeData->figureType() == "Process") {
+            item = new Process;
+        } else if (shapeItemMimeData->figureType() == "Decision") {
+            item = new Decision;
+        } else if (shapeItemMimeData->figureType() == "Input/Output") {
+            item = new InOut;
+        }
+        if (item) {
+            item->setPos(mapToScene(event->pos()));
+            scene_->addItem(item);
+        }
+    }
+}
+
 void View::showAndUpdateItemInfoLabels(FlowchartShapeItem *selectedItem)
 {
     selectedItemPositionLabel_->show();
@@ -119,6 +164,7 @@ void View::initFlags()
 {
     setViewportUpdateMode(FullViewportUpdate);
     setMouseTracking(true);
+    setAcceptDrops(true);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setTransformationAnchor(AnchorUnderMouse);

@@ -90,7 +90,9 @@ public:
     explicit TextItem(QGraphicsItem* parent = nullptr);
 
 protected:
-    void focusOutEvent(QFocusEvent* event) override;
+    QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
+
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
 };
 
 #endif // TEXTITEM_H

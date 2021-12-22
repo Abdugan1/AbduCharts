@@ -5,6 +5,7 @@
 #include "textitem.h"
 
 #include "uppertoolbar.h"
+#include "dockwidget.h"
 
 #include <QTextCursor>
 
@@ -17,20 +18,6 @@ MainWindow::MainWindow(QWidget *parent)
     , view_(new View(scene_))
     , upperToolBar_(new UpperToolBar)
 {
-    View view(scene_);
-
-    FlowchartShapeItem* myItem = new Decision;
-    scene_->addItem(myItem);
-
-    FlowchartShapeItem* myItem2 = new Process;
-    scene_->addItem(myItem2);
-
-    FlowchartShapeItem* myItem3 = new Terminal;
-    scene_->addItem(myItem3);
-
-    FlowchartShapeItem* myItem4 = new InOut;
-    scene_->addItem(myItem4);
-
     connect(upperToolBar_, &UpperToolBar::fontFormatChanged,
             this,          &MainWindow::onTextFormatChanged);
 
@@ -43,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     addToolBar(upperToolBar_);
+    addDockWidget(Qt::LeftDockWidgetArea, new DockWidget);
     setCentralWidget(view_);
 }
 

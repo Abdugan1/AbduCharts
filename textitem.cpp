@@ -87,10 +87,9 @@ void FlowchartTextItem::mergeTextFormatToWordUnderCursor(QTextCursor *cursor, co
         cursor->swap(temp);
         cursor->mergeCharFormat(format);
     } else {
-        int prevPos = cursor->position();
         cursor->mergeCharFormat(lastCharFormat_);
         cursor->clearSelection();
-        cursor->setPosition(prevPos);
+        cursor->setPosition(temp.position());
     }
 }
 
@@ -240,10 +239,21 @@ TextItem::TextItem(QGraphicsItem *parent)
     : FlowchartTextItem(parent)
 {
     setPlainText("Im a TextItem!!!");
+    setFlags(ItemIsMovable | ItemIsSelectable);
 }
 
-void TextItem::focusOutEvent(QFocusEvent *event)
+QVariant TextItem::itemChange(GraphicsItemChange change, const QVariant &value)
 {
-    qDebug() << "focusOutEvent";
-    FlowchartTextItem::focusOutEvent(event);
+    if (change == ItemSelectedHasChanged && !value.toBool()) {
+        qDebug() << "lost selection";
+        disableTextEditing();
+    }
+    return FlowchartTextItem::itemChange(change, value);
+}
+
+void TextItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
+{
+    FlowchartTextItem::mouseDoubleClickEvent(event);
+    if (textInteractionFlags() == Qt::NoTextInteraction)
+        enableTextEditing();
 }

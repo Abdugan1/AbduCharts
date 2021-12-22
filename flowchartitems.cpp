@@ -275,7 +275,7 @@ Decision::Decision(QGraphicsItem *parent)
 
 QString Decision::figureType() const
 {
-    return tr("Desicion");
+    return tr("Decision");
 }
 
 //------------------------------------------------

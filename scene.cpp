@@ -4,6 +4,7 @@
 #include "guideline.h"
 
 #include <QTextCharFormat>
+#include <QGraphicsSceneDragDropEvent>
 #include <QDebug>
 
 Scene::Scene(QObject *parent)
@@ -25,6 +26,14 @@ void Scene::addItem(FlowchartShapeItem *item)
 
     connectSignalsOfShapeItem(item);
     connectSignalsOfTextItem(item->textItem());
+}
+
+void Scene::addItem(FlowchartTextItem *item)
+{
+    QGraphicsScene::addItem(item);
+    textItems_.append(item);
+
+    connectSignalsOfTextItem(item);
 }
 
 void Scene::removeItem(FlowchartShapeItem *item)

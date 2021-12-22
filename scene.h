@@ -18,6 +18,7 @@ public:
     explicit Scene(const QRectF& sceneRect, QObject* parent = nullptr);
 
     void addItem(FlowchartShapeItem* item);
+    void addItem(FlowchartTextItem* item);
     void removeItem(FlowchartShapeItem* item);
 
 signals:
@@ -45,6 +46,7 @@ private:
 
 private:
     QList<FlowchartShapeItem*> flowchartShapeItems_;
+    QList<FlowchartTextItem*> textItems_;
     QList<GuideLine*> guideLines_;
 };
 

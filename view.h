@@ -17,7 +17,13 @@ public:
 protected:
     void drawBackground(QPainter *painter, const QRectF &rect) override;
     void wheelEvent(QWheelEvent* event) override;
+
     void mouseMoveEvent(QMouseEvent *event) override;
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
+
+    void dragEnterEvent(QDragEnterEvent* event) override;
+    void dragMoveEvent(QDragMoveEvent *event) override;
+    void dropEvent(QDropEvent* event) override;
 
 private slots:
     void showAndUpdateItemInfoLabels(FlowchartShapeItem* selectedItem);
