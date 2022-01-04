@@ -95,11 +95,6 @@ void FlowchartShapeItem::setText(const QString &text)
     textItem_->setPlainText(text);
 }
 
-void FlowchartShapeItem::setTextAlignment(Qt::Alignment alignment)
-{
-    textItem_->setAlignment(alignment);
-}
-
 void FlowchartShapeItem::onResizeHandleMoved(ResizeHandle *resizeHandle, qreal dx, qreal dy)
 {
     prepareGeometryChange();

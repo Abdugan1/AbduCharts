@@ -9,16 +9,19 @@
 #include <QCursor>
 #include <QDebug>
 
-QTextCharFormat FlowchartTextItem::futureItemsFormat_ = QTextCharFormat();
+QTextCharFormat FlowchartTextItem::defaultCharFormat_ = QTextCharFormat();
+QTextBlockFormat FlowchartTextItem::defaultBlockFormat_ = QTextBlockFormat();
 
 FlowchartTextItem::FlowchartTextItem(QGraphicsItem *parent)
     : QGraphicsTextItem(parent)
 {
-    futureItemsFormat_.setFontFamily("Arial");
-    futureItemsFormat_.setFontPointSize(20);
+    setDefaultFormat();
 
-    connect(document(), &QTextDocument::contentsChange,
-            this,       &FlowchartTextItem::updateAlignment);
+    // Without this align wont work
+    connect(document(), &QTextDocument::contentsChange, this, [this]() {
+        setTextWidth(-1);
+        setTextWidth(document()->idealWidth());
+    });
 }
 
 FlowchartTextItem::~FlowchartTextItem()
@@ -26,29 +29,17 @@ FlowchartTextItem::~FlowchartTextItem()
     qDebug() << "Bye TextItem!";
 }
 
-void FlowchartTextItem::updateAlignment()
-{
-    QPointF topRightPrev = boundingRect().topRight();
-    setTextWidth(-1);
-    setTextWidth(boundingRect().width());
-    setAlignment(alignment_);
-    QPointF topRight = boundingRect().topRight();
-
-    if (alignment_ & Qt::AlignRight)
-        setPos(pos() + (topRightPrev - topRight));
-}
-
 void FlowchartTextItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     QGraphicsTextItem::mousePressEvent(event);
-    emitCurrentCharFormatChangedIfNecessary();
+    emitCurrentFormattingChangedIfNecessary();
 }
 
 void FlowchartTextItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
     QGraphicsTextItem::mouseMoveEvent(event);
 
-    emitCurrentCharFormatChangedIfNecessary();
+    emitCurrentFormattingChangedIfNecessary();
 }
 
 void FlowchartTextItem::keyPressEvent(QKeyEvent *event)
@@ -56,7 +47,7 @@ void FlowchartTextItem::keyPressEvent(QKeyEvent *event)
     QGraphicsTextItem::keyPressEvent(event);
 
     if (isKeyThatCanChangeCursorPositionPressed(event)) {
-        emitCurrentCharFormatChangedIfNecessary();
+        emitCurrentFormattingChangedIfNecessary();
     }
 }
 
@@ -81,69 +72,83 @@ void FlowchartTextItem::mergeTextFormatToSelection(QTextCursor *cursor, const QT
 
 void FlowchartTextItem::mergeTextFormatToWordUnderCursor(QTextCursor *cursor, const QTextCharFormat &format)
 {
-    QTextCursor temp = *cursor;
-    cursor->select(QTextCursor::WordUnderCursor);
-    if (cursor->selectedText().isEmpty()) {
-        cursor->swap(temp);
-        cursor->mergeCharFormat(format);
-    } else {
-        cursor->mergeCharFormat(lastCharFormat_);
-        cursor->clearSelection();
-        cursor->setPosition(temp.position());
-    }
+    QTextCursor newCursor = *cursor;
+    int previousPosition = newCursor.position();
+
+    newCursor.select(QTextCursor::WordUnderCursor);
+    newCursor.mergeCharFormat(format);
+    newCursor.setPosition(previousPosition);
+
+    setTextCursor(newCursor);
+
+    QFont font = newCursor.charFormat().font();
+    qDebug() << "Position:" << cursor->position();
+    qDebug() << "Family:" << font.family();
+    qDebug() << "Size:" << font.pointSize();
+    qDebug() << "Bold?" << font.bold();
+    qDebug() << "Italic?" << font.italic();
+    qDebug() << "Underline?" << font.underline();
 }
 
-void FlowchartTextItem::emitCurrentCharFormatChangedIfNecessary()
+void FlowchartTextItem::emitCurrentFormattingChangedIfNecessary()
 {
-    if (lastCharFormat_ != textCursor().charFormat()) {
+    if (isCharFormatChanged()) {
         lastCharFormat_ = textCursor().charFormat();
         emit currentCharFormatChanged(lastCharFormat_);
+    } else if (isBlockFormatChanged()) {
+        lastBlockFormat_ = textCursor().blockFormat();
+        emit currentBlockFormatChanged(lastBlockFormat_);
     }
 }
 
-Qt::Alignment FlowchartTextItem::alignment() const
+bool FlowchartTextItem::isCharFormatChanged() const
 {
-    return alignment_;
+    return lastCharFormat_ != textCursor().charFormat();
 }
 
-void FlowchartTextItem::setAlignment(Qt::Alignment newAlignment)
+bool FlowchartTextItem::isBlockFormatChanged() const
 {
-    alignment_ = newAlignment;
-    QTextBlockFormat format;
-    format.setAlignment(newAlignment);
-    QTextCursor cursor = textCursor();
-    int position = textCursor().position();
-    cursor.select(QTextCursor::Document);
-    cursor.mergeBlockFormat(format);
-    cursor.clearSelection();
-    cursor.setPosition(position);
-    setTextCursor(cursor);
+    return lastBlockFormat_ != textCursor().blockFormat();
 }
 
-void FlowchartTextItem::mergeTextFormat(const QTextCharFormat &format)
+void FlowchartTextItem::setDefaultFormat()
+{
+    QTextOption option;
+    option.setAlignment(defaultBlockFormat_.alignment());
+    QFont font(defaultCharFormat_.font());
+
+    document()->setDefaultTextOption(option);
+    document()->setDefaultFont(font);
+}
+
+void FlowchartTextItem::mergeCharFormat(const QTextCharFormat &format)
 {
     lastCharFormat_.merge(format);
-    setTextFormatForAllFutureItems(format);
 
-    QTextCursor cursor = textCursor();
+    QTextCursor cursor(textCursor());
     if (cursor.hasSelection()) {
         mergeTextFormatToSelection(&cursor, format);
     } else {
         mergeTextFormatToWordUnderCursor(&cursor, format);
     }
 
-    setTextCursor(cursor);
+    defaultCharFormat_.merge(format);
 }
 
-void FlowchartTextItem::setTextFormatForAllFutureItems(const QTextCharFormat &format)
+void FlowchartTextItem::setBlockFormat(const QTextBlockFormat &format)
 {
-    futureItemsFormat_ = format;
+    QTextCursor cursor(textCursor());
+    cursor.setBlockFormat(format);
+
+    lastBlockFormat_ = format;
+    defaultBlockFormat_ = format;
 }
 
 void FlowchartTextItem::setTextCursor(const QTextCursor &cursor)
 {
+    qDebug() << "custom setTextCursor called";
     QGraphicsTextItem::setTextCursor(cursor);
-    emitCurrentCharFormatChangedIfNecessary();
+    emitCurrentFormattingChangedIfNecessary();
 }
 
 void FlowchartTextItem::enableTextEditing()
@@ -183,11 +188,10 @@ FlowchartShapesTextItem::FlowchartShapesTextItem(FlowchartShapeItem *parent)
     : FlowchartTextItem(parent)
     , myItem_(parent)
 {
-    centerOnMyItem();
-    setAlignment(Qt::AlignCenter);
+    connect(parent, &FlowchartShapeItem::resized, this, &FlowchartShapesTextItem::centerOnShapeItem);
+    connect(document(), &QTextDocument::contentsChanged, this, &FlowchartShapesTextItem::centerOnShapeItem);
 
-    connect(parent, &FlowchartShapeItem::resized, this, &FlowchartShapesTextItem::centerOnMyItem);
-    connect(document(), &QTextDocument::contentsChanged, this, &FlowchartShapesTextItem::centerOnMyItem);
+    centerOnShapeItem();
 }
 
 FlowchartShapesTextItem::~FlowchartShapesTextItem()
@@ -224,7 +228,7 @@ void FlowchartShapesTextItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
     }
 }
 
-void FlowchartShapesTextItem::centerOnMyItem()
+void FlowchartShapesTextItem::centerOnShapeItem()
 {
     setPos(-boundingRect().width() / 2, -boundingRect().height() / 2);
 }

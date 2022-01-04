@@ -35,8 +35,6 @@ public:
 
     void setText(const QString& text);
 
-    void setTextAlignment(Qt::Alignment alignment);
-
     FlowchartShapesTextItem *textItem() const;
 
 signals:

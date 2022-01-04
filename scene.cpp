@@ -4,6 +4,7 @@
 #include "guideline.h"
 
 #include <QTextCharFormat>
+#include <QTextBlockFormat>
 #include <QGraphicsSceneDragDropEvent>
 #include <QDebug>
 
@@ -43,11 +44,19 @@ void Scene::removeItem(FlowchartShapeItem *item)
     item->deleteLater();
 }
 
-void Scene::applyFormatOnCurrentTextItem(const QTextCharFormat &format)
+void Scene::applyCharFormatOnCurrentTextItem(const QTextCharFormat &format)
 {
     QGraphicsItem* focusItem = this->focusItem();
     if (auto textItem = qgraphicsitem_cast<FlowchartTextItem*>(focusItem)) {
-        textItem->mergeTextFormat(format);
+        textItem->mergeCharFormat(format);
+    }
+}
+
+void Scene::applyBlockFormatOnCurrentTextItem(const QTextBlockFormat &format)
+{
+    QGraphicsItem* focusItem = this->focusItem();
+    if (auto textItem = qgraphicsitem_cast<FlowchartTextItem*>(focusItem)) {
+        textItem->setBlockFormat(format);
     }
 }
 
@@ -132,6 +141,9 @@ void Scene::connectSignalsOfTextItem(FlowchartTextItem *textItem)
 {
     connect(textItem, &FlowchartTextItem::currentCharFormatChanged,
             this,     &Scene::currentCharFormatChanged);
+
+    connect(textItem, &FlowchartTextItem::currentBlockFormatChanged,
+            this,     &Scene::currentBlockFormatChanged);
 
     connect(textItem, &FlowchartTextItem::enabled,
             this,     &Scene::switchedToAnotherTextItem);

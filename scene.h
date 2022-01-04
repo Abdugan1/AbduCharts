@@ -9,6 +9,7 @@ class PositionLine;
 class FlowchartTextItem;
 
 class QTextCharFormat;
+class QTextBlockFormat;
 
 class Scene : public QGraphicsScene
 {
@@ -27,10 +28,12 @@ signals:
     void itemMoved(FlowchartShapeItem* item);
 
     void currentCharFormatChanged(const QTextCharFormat& format);
+    void currentBlockFormatChanged(const QTextBlockFormat& format);
     void switchedToAnotherTextItem(FlowchartTextItem* textItem);
 
 public slots:
-    void applyFormatOnCurrentTextItem(const QTextCharFormat& format);
+    void applyCharFormatOnCurrentTextItem(const QTextCharFormat& format);
+    void applyBlockFormatOnCurrentTextItem(const QTextBlockFormat& format);
 
 private slots:
     void onItemMoved(FlowchartShapeItem* movedItem);

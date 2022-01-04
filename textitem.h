@@ -11,11 +11,8 @@ public:
     explicit FlowchartTextItem(QGraphicsItem* parent = nullptr);
     ~FlowchartTextItem();
 
-    Qt::Alignment alignment() const;
-    void setAlignment(Qt::Alignment newAlignment);
-
-    void mergeTextFormat(const QTextCharFormat& format);
-    static void setTextFormatForAllFutureItems(const QTextCharFormat& format);
+    void mergeCharFormat(const QTextCharFormat& format);
+    void setBlockFormat(const QTextBlockFormat& format);
 
     void setTextCursor(const QTextCursor& cursor);
 
@@ -27,9 +24,7 @@ signals:
     void disabled(FlowchartTextItem* textItem);
 
     void currentCharFormatChanged(const QTextCharFormat& format);
-
-private slots:
-    void updateAlignment();
+    void currentBlockFormatChanged(const QTextBlockFormat& format);
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
@@ -44,13 +39,19 @@ private:
     void mergeTextFormatToSelection(QTextCursor* cursor, const QTextCharFormat& format);
     void mergeTextFormatToWordUnderCursor(QTextCursor* cursor, const QTextCharFormat& format);
 
-    void emitCurrentCharFormatChangedIfNecessary();
+    void emitCurrentFormattingChangedIfNecessary();
+
+    bool isCharFormatChanged() const;
+    bool isBlockFormatChanged() const;
+
+    void setDefaultFormat();
 
 private:
-    Qt::Alignment alignment_;
+    QTextCharFormat  lastCharFormat_;
+    QTextBlockFormat lastBlockFormat_;
 
-    QTextCharFormat lastCharFormat_;
-    static QTextCharFormat futureItemsFormat_;
+    static QTextCharFormat  defaultCharFormat_;
+    static QTextBlockFormat defaultBlockFormat_;
 };
 
 
@@ -75,7 +76,7 @@ protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
 
 private slots:
-    void centerOnMyItem();
+    void centerOnShapeItem();
 
 private:
     FlowchartShapeItem* myItem_ = nullptr;

@@ -6,6 +6,7 @@
 class QFontComboBox;
 class QComboBox;
 class QTextCharFormat;
+class QTextBlockFormat;
 
 class UpperToolBar : public QToolBar
 {
@@ -14,10 +15,12 @@ public:
     explicit UpperToolBar(QWidget* parent = nullptr);
 
 signals:
-    void fontFormatChanged(const QTextCharFormat& format);
+    void charFormatChanged(const QTextCharFormat& format);
+    void blockFormatChanged(const QTextBlockFormat& format);
 
 public slots:
-    void updateTextFormattingResponsiblePart(const QTextCharFormat& format);
+    void updateCharFormattingResponsiblePart(const QTextCharFormat& format);
+    void updateBlockFormattingResponsiblePart(const QTextBlockFormat& format);
 
 private slots:
     void mergeFontFamily(const QString& fontFamily);
@@ -25,6 +28,9 @@ private slots:
     void mergeBold();
     void mergeItalic();
     void mergeUnderline();
+    void mergeAlignLeft();
+    void mergeAlignCenter();
+    void mergeAlignRight();
 
 private:
     void addTextFormattingResponsiblePart();
@@ -37,6 +43,10 @@ private:
     QToolButton* textBoldButton_      = nullptr;
     QToolButton* textItalicButton_    = nullptr;
     QToolButton* textUnderlineButton_ = nullptr;
+
+    QToolButton* textAlignLeft_     = nullptr;
+    QToolButton* textAlignCenter_   = nullptr;
+    QToolButton* textAlignRight_    = nullptr;
 };
 
 #endif // UPPERTOOLBAR_H
