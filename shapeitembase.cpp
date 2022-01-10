@@ -1,4 +1,4 @@
-#include "itembase.h"
+#include "shapeitembase.h"
 
 #include <QGraphicsSceneMouseEvent>
 

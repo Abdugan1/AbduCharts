@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QRectF>
+#include <QtMath>
 
 class ResizeHandle;
 class FlowchartShapeItem;
@@ -16,7 +17,7 @@ public:
     void setCompareRect(const QRectF &newCompareRect);
 
 signals:
-    void resizeBeenMade();
+    void resizeBeenMade(const QRectF& oldRect, const QRectF& currentRect);
 
 public slots:
     void onHandleMoved(ResizeHandle* resizeHandle, qreal dx, qreal dy);

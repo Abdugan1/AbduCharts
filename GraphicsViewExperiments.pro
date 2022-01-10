@@ -11,14 +11,14 @@ CONFIG += c++11
 SOURCES += \
     dockwidget.cpp \
     flowchartitems.cpp \
-    guideline.cpp \
-    itembase.cpp \
+    guidelines.cpp \
     itembutton.cpp \
     itemresizer.cpp \
     main.cpp \
     mainwindow.cpp \
     resizehandle.cpp \
     scene.cpp \
+    shapeitembase.cpp \
     shapeitemdrag.cpp \
     textitem.cpp \
     uppertoolbar.cpp \
@@ -27,13 +27,13 @@ SOURCES += \
 HEADERS += \
     dockwidget.h \
     flowchartitems.h \
-    guideline.h \
-    itembase.h \
+    guidelines.h \
     itembutton.h \
     itemresizer.h \
     mainwindow.h \
     resizehandle.h \
     scene.h \
+    shapeitembase.h \
     shapeitemdrag.h \
     textitem.h \
     uppertoolbar.h \

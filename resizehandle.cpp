@@ -52,6 +52,12 @@ void ResizeHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     }
 }
 
+void ResizeHandle::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    ShapeItemBase::mouseReleaseEvent(event);
+    emit released();
+}
+
 QPointF ResizeHandle::restrictedPosition(const QPointF &oldPos, const QPointF &newPos)
 {
     QPointF output = oldPos;

@@ -1,7 +1,7 @@
 #ifndef FLOWCHARTITEMS_H
 #define FLOWCHARTITEMS_H
 
-#include "itembase.h"
+#include "shapeitembase.h"
 #include "resizehandle.h"
 
 class ItemResizer;
@@ -39,10 +39,16 @@ public:
 
 signals:
     void moved(FlowchartShapeItem* item);
-    void resized();
+
+    void resized(FlowchartShapeItem* item,
+                 const QRectF& oldRect,
+                 const QRectF& currentRect);
+
     void selected(FlowchartShapeItem* item);
     void lostSelection(FlowchartShapeItem* item);
     void released();
+
+    void resizeHandleReleased();
 
 private slots:
     void onResizeHandleMoved(ResizeHandle* resizeHandle, qreal dx, qreal dy);

@@ -36,7 +36,10 @@ FlowchartShapeItem::FlowchartShapeItem(QGraphicsItem *parent)
     setAcceptedMouseButtons(Qt::LeftButton);
 
     resizer_ = new ItemResizer(this);
-    connect(resizer_, &ItemResizer::resizeBeenMade, this, &FlowchartShapeItem::resized);
+    connect(resizer_, &ItemResizer::resizeBeenMade,
+            [this] (const QRectF& oldRect, const QRectF& currentRect) {
+        emit resized(this, oldRect, currentRect);
+    });
 
     textItem_ = new FlowchartShapesTextItem(this);
     connect(this, &FlowchartShapeItem::lostSelection, textItem_, &FlowchartShapesTextItem::disableTextEditingAndMousePress);
@@ -49,6 +52,11 @@ FlowchartShapeItem::FlowchartShapeItem(QGraphicsItem *parent)
     addResizeHandle(ResizeHandle::BottomLeft );
     addResizeHandle(ResizeHandle::Bottom     );
     addResizeHandle(ResizeHandle::BottomRight);
+
+    for (auto resizeHandle : resizeHandles_) {
+        connect(resizeHandle, &ResizeHandle::released,
+                this, &FlowchartShapeItem::resizeHandleReleased);
+    }
 }
 
 FlowchartShapeItem::~FlowchartShapeItem()

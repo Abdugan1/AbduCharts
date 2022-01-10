@@ -15,7 +15,6 @@ class Scene : public QGraphicsScene
 {
     Q_OBJECT
 public:
-    explicit Scene(QObject *parent = nullptr);
     explicit Scene(const QRectF& sceneRect, QObject* parent = nullptr);
 
     void addItem(FlowchartShapeItem* item);
@@ -36,13 +35,18 @@ public slots:
     void applyBlockFormatOnCurrentTextItem(const QTextBlockFormat& format);
 
 private slots:
-    void onItemMoved(FlowchartShapeItem* movedItem);
+    void onItemMoved(const FlowchartShapeItem* movedItem);
+
+    void onItemResized(const FlowchartShapeItem* resizedItem,
+                       const QRectF& oldRect,
+                       const QRectF& currentRect);
+
     void bringToFront(FlowchartShapeItem* item);
 
     void deleteAllGuidelines();
 
 private:
-    void addPositionLine(PositionLine* positionLine);
+    void addGuideLine(GuideLine* positionLine);
 
     void connectSignalsOfShapeItem(FlowchartShapeItem* item);
     void connectSignalsOfTextItem(FlowchartTextItem* textItem);

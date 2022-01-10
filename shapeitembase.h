@@ -1,5 +1,5 @@
-#ifndef ITEMBASE_H
-#define ITEMBASE_H
+#ifndef SHAPEITEMBASE_H
+#define SHAPEITEMBASE_H
 
 #include <QGraphicsItem>
 
@@ -32,4 +32,4 @@ private:
 
 QPointF snapToGrid(const QPointF& point, int gridSize);
 
-#endif // ITEMBASE_H
+#endif // SHAPEITEMBASE_H

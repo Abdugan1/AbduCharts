@@ -1,7 +1,7 @@
 #ifndef RESIZEHANDLE_H
 #define RESIZEHANDLE_H
 
-#include "itembase.h"
+#include "shapeitembase.h"
 
 class ResizeHandle : public QObject, public ShapeItemBase
 {
@@ -30,9 +30,11 @@ public:
 
 signals:
     void moved(ResizeHandle* resizeHandle, qreal dx, qreal dy);
+    void released();
 
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 
 private:
     QPointF restrictedPosition(const QPointF& oldPos, const QPointF& newPos);

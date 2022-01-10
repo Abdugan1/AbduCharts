@@ -20,7 +20,7 @@ void ItemResizer::onHandleMoved(ResizeHandle *resizeHandle, qreal dx, qreal dy)
     updateCompareRect(resizeHandle, dx, dy);
     if (compareRect_ != oldCompareRect_) {
         doResize();
-        emit resizeBeenMade();
+        emit resizeBeenMade(oldCompareRect_, compareRect_);
     }
 }
 

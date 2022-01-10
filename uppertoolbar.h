@@ -7,6 +7,7 @@ class QFontComboBox;
 class QComboBox;
 class QTextCharFormat;
 class QTextBlockFormat;
+class QToolButton;
 
 class UpperToolBar : public QToolBar
 {

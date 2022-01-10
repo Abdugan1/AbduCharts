@@ -1,18 +1,12 @@
 #include "scene.h"
 #include "flowchartitems.h"
 #include "textitem.h"
-#include "guideline.h"
+#include "guidelines.h"
 
 #include <QTextCharFormat>
 #include <QTextBlockFormat>
 #include <QGraphicsSceneDragDropEvent>
 #include <QDebug>
-
-Scene::Scene(QObject *parent)
-    : QGraphicsScene(parent)
-{
-
-}
 
 Scene::Scene(const QRectF &sceneRect, QObject *parent)
     : QGraphicsScene(sceneRect, parent)
@@ -60,47 +54,38 @@ void Scene::applyBlockFormatOnCurrentTextItem(const QTextBlockFormat &format)
     }
 }
 
-void Scene::onItemMoved(FlowchartShapeItem *movedItem)
+void Scene::onItemMoved(const FlowchartShapeItem *movedItem)
 {
     if (selectedItems().count() > 1)
         return;
 
     deleteAllGuidelines();
 
-    QPointF movedItemPos = movedItem->pos();
+    QList<PositionLine*> positionLines;
+    positionLines.append(GuideLineCreator::createLeftPositionLines(movedItem,   flowchartShapeItems_));
+    positionLines.append(GuideLineCreator::createRightPositionLines(movedItem,  flowchartShapeItems_));
+    positionLines.append(GuideLineCreator::createTopPositionLines(movedItem,    flowchartShapeItems_));
+    positionLines.append(GuideLineCreator::createBottomPositionLines(movedItem, flowchartShapeItems_));
+    positionLines.append(GuideLineCreator::createCenterPositionLines(movedItem, flowchartShapeItems_));
 
-    QPointF verticalBegin = movedItemPos;
-    QPointF verticalEnd   = movedItemPos;
+    qDebug() << "position lines count:" << positionLines.count();
 
-    QPointF horizontalBegin = movedItemPos;
-    QPointF horizontalEnd   = movedItemPos;
-    for (const auto& item : qAsConst(flowchartShapeItems_)) {
-        QPointF currentItemPos = item->pos();
+    for (auto positionLine : qAsConst(positionLines))
+        addGuideLine(positionLine);
+}
 
-        // x
-        if (currentItemPos.x() == movedItemPos.x()) {
-            verticalBegin.setY(qMin(currentItemPos.y(), verticalBegin.y()));
-            verticalEnd.setY(qMax(currentItemPos.y(), verticalEnd.y()));
-        }
-
-        //y
-        if (currentItemPos.y() == movedItemPos.y()) {
-            horizontalBegin.setX(qMin(currentItemPos.x(), horizontalBegin.x()));
-            horizontalEnd.setX(qMax(currentItemPos.x(), horizontalEnd.x()));
-        }
-    }
-
-    if (verticalBegin.y() != movedItemPos.y()) {
-        addPositionLine(new PositionLine({verticalBegin, verticalEnd}));
-    } else if (verticalEnd.y() != movedItemPos.y()) {
-        addPositionLine(new PositionLine({verticalEnd, verticalBegin}));
-    }
-
-    if (horizontalBegin.x() != movedItemPos.x()) {
-        addPositionLine(new PositionLine({horizontalBegin, horizontalEnd}));
-    } else if (horizontalEnd.x() != movedItemPos.x()) {
-        addPositionLine(new PositionLine({horizontalEnd, horizontalBegin}));
-    }
+void Scene::onItemResized(const FlowchartShapeItem *resizedItem,
+                          const QRectF &oldRect,
+                          const QRectF &currentRect)
+{
+    deleteAllGuidelines();
+    QList<SizeLine*> sizeLines =
+            GuideLineCreator::createSizeLine(resizedItem,
+                                             oldRect,
+                                             currentRect,
+                                             flowchartShapeItems_);
+    for (auto sizeLine : qAsConst(sizeLines))
+        addGuideLine(sizeLine);
 }
 
 void Scene::bringToFront(FlowchartShapeItem *item)
@@ -121,7 +106,7 @@ void Scene::deleteAllGuidelines()
     guideLines_.clear();
 }
 
-void Scene::addPositionLine(PositionLine *positionLine)
+void Scene::addGuideLine(GuideLine *positionLine)
 {
     QGraphicsScene::addItem(positionLine);
     guideLines_.append(positionLine);
@@ -129,12 +114,14 @@ void Scene::addPositionLine(PositionLine *positionLine)
 
 void Scene::connectSignalsOfShapeItem(FlowchartShapeItem *item)
 {
-    connect(item, &FlowchartShapeItem::moved,           this, &Scene::onItemMoved);
-    connect(item, &FlowchartShapeItem::selected,        this, &Scene::bringToFront);
-    connect(item, &FlowchartShapeItem::released,        this, &Scene::deleteAllGuidelines);
-    connect(item, &FlowchartShapeItem::selected,        this, &Scene::itemSelected);
-    connect(item, &FlowchartShapeItem::moved,           this, &Scene::itemMoved);
-    connect(item, &FlowchartShapeItem::lostSelection,   this, &Scene::itemLostSelection);
+    connect(item, &FlowchartShapeItem::moved,                this, &Scene::onItemMoved);
+    connect(item, &FlowchartShapeItem::resized,              this, &Scene::onItemResized);
+    connect(item, &FlowchartShapeItem::selected,             this, &Scene::bringToFront);
+    connect(item, &FlowchartShapeItem::released,             this, &Scene::deleteAllGuidelines);
+    connect(item, &FlowchartShapeItem::selected,             this, &Scene::itemSelected);
+    connect(item, &FlowchartShapeItem::moved,                this, &Scene::itemMoved);
+    connect(item, &FlowchartShapeItem::lostSelection,        this, &Scene::itemLostSelection);
+    connect(item, &FlowchartShapeItem::resizeHandleReleased, this, &Scene::deleteAllGuidelines);
 }
 
 void Scene::connectSignalsOfTextItem(FlowchartTextItem *textItem)
