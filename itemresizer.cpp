@@ -74,8 +74,3 @@ void ItemResizer::doResize()
     compareRect_ = targetResizeItem_->contentRect();
     targetResizeItem_->setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
 }
-
-void ItemResizer::limitResize()
-{
-
-}

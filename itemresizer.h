@@ -25,7 +25,6 @@ public slots:
 private:
     void updateCompareRect(const ResizeHandle* resizeHandle, qreal dx, qreal dy);
     void doResize();
-    void limitResize();
 
 private:
     FlowchartShapeItem* targetResizeItem_ = nullptr;

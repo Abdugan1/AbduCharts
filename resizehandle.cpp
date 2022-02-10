@@ -1,4 +1,5 @@
 #include "resizehandle.h"
+#include "grid.h"
 
 #include <QPainter>
 #include <QGraphicsSceneMouseEvent>
@@ -43,7 +44,8 @@ PositionFlags ResizeHandle::positionFlags() const
 void ResizeHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
     QPointF oldPos = scenePos();
-    QPointF newPos = snapToGrid(event->scenePos(), 20);
+    QPointF newPos = Grid::enabled() ? Grid::snapToGrid(event->scenePos())
+                                     : event->scenePos();
     newPos = restrictedPosition(oldPos, newPos);
     if (newPos != oldPos) {
         qreal dx = newPos.x() - oldPos.x();

@@ -1,7 +1,8 @@
 #include "flowchartitems.h"
 #include "resizehandle.h"
 #include "itemresizer.h"
-#include "textitem.h"
+#include "textitems.h"
+#include "grid.h"
 
 #include <QStyleOptionGraphicsItem>
 #include <QPainter>
@@ -38,11 +39,12 @@ FlowchartShapeItem::FlowchartShapeItem(QGraphicsItem *parent)
     resizer_ = new ItemResizer(this);
     connect(resizer_, &ItemResizer::resizeBeenMade,
             [this] (const QRectF& oldRect, const QRectF& currentRect) {
-        emit resized(this, oldRect, currentRect);
+        emit resizedByHands(this, oldRect, currentRect);
     });
 
     textItem_ = new FlowchartShapesTextItem(this);
-    connect(this, &FlowchartShapeItem::lostSelection, textItem_, &FlowchartShapesTextItem::disableTextEditingAndMousePress);
+    connect(this, &FlowchartShapeItem::lostSelection, textItem_,
+            &FlowchartShapesTextItem::disableTextEditingAndMousePress);
 
     addResizeHandle(ResizeHandle::TopLeft    );
     addResizeHandle(ResizeHandle::Top        );
@@ -112,8 +114,8 @@ void FlowchartShapeItem::onResizeHandleMoved(ResizeHandle *resizeHandle, qreal d
 
 QVariant FlowchartShapeItem::itemChange(GraphicsItemChange change, const QVariant &value)
 {
-    if (change == ItemPositionChange) {
-        return snapToGrid(value.toPointF(), 20);
+    if (change == ItemPositionChange && Grid::enabled()) {
+        return Grid::snapToGrid(value.toPointF());
     } else if (change == ItemPositionHasChanged) {
         emit moved(this);
     } else if (change == ItemSelectedHasChanged) {
@@ -132,12 +134,13 @@ void FlowchartShapeItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
         textItem_->disableTextEditingAndMousePress();
 
     ShapeItemBase::mousePressEvent(event);
+    emit pressed(this);
 }
 
 void FlowchartShapeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    emit released();
     ShapeItemBase::mouseReleaseEvent(event);
+    emit released();
 }
 
 void FlowchartShapeItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
@@ -230,7 +233,7 @@ Terminal::Terminal(QGraphicsItem *parent)
 
 QString Terminal::figureType() const
 {
-    return tr("Terminal");
+    return "Terminal";
 }
 
 //------------------------------------------------
@@ -248,7 +251,7 @@ Process::Process(QGraphicsItem *parent)
 
 QString Process::figureType() const
 {
-    return tr("Process");
+    return "Process";
 }
 
 
@@ -278,7 +281,7 @@ Decision::Decision(QGraphicsItem *parent)
 
 QString Decision::figureType() const
 {
-    return tr("Decision");
+    return "Decision";
 }
 
 //------------------------------------------------
@@ -303,5 +306,21 @@ InOut::InOut(QGraphicsItem *parent)
 
 QString InOut::figureType() const
 {
-    return tr("Input/Output");
+    return "Input/Output";
+}
+
+
+//------------------------------------------------
+//                ShapeCreator
+//------------------------------------------------
+
+
+FlowchartShapeItem* ShapeCreator::createShape(const QString &shapeType)
+{
+    if      (shapeType == "Terminal")      return (new Terminal);
+    else if (shapeType == "Process")       return (new Process);
+    else if (shapeType == "Decision")      return (new Decision);
+    else if (shapeType == "Input/Output")  return (new InOut);
+
+    return nullptr;
 }

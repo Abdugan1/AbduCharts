@@ -2,19 +2,22 @@
 #include "scene.h"
 #include "flowchartitems.h"
 #include "shapeitemdrag.h"
-#include "textitem.h"
+#include "textitems.h"
+#include "undocommands.h"
+#include "grid.h"
 
 #include <QWheelEvent>
 #include <QTimeLine>
 #include <QLabel>
 #include <QToolButton>
 #include <QBoxLayout>
+#include <QUndoStack>
+#include <QAction>
 #include <QDebug>
 
 const QString CursorPositionText            = QObject::tr("Cursor position: (%1, %2)");
 const QString SelectedItemPositionText      = QObject::tr("Item position: (%1, %2)");
 const QString SelectedItemFigureTypeText    = QObject::tr("Figure type: %1");
-const QPen GridPen = QPen(Qt::lightGray, 0.5);
 
 View::View(Scene *scene, QWidget *parent)
     : QGraphicsView(scene, parent)
@@ -22,26 +25,35 @@ View::View(Scene *scene, QWidget *parent)
     , cursorPositionLabel_(new QLabel(CursorPositionText.arg("0").arg("0")))
     , selectedItemFigureTypeLabel_(new QLabel(SelectedItemFigureTypeText))
     , selectedItemPositionLabel_(new QLabel(SelectedItemPositionText))
+    , undoStack_(new QUndoStack(this))
 {
     init();
 }
 
+View::~View()
+{
+    qDebug() << "View: bye";
+}
+
 void View::drawBackground(QPainter *painter, const QRectF &rect)
 {
-    constexpr int gridSize = 20;
-    int left = int(rect.left() - (int(rect.left()) % gridSize));
-    int top  = int(rect.top()  - (int(rect.top())  % gridSize));
+    if (Grid::enabled()) {
+        const int gridSize = Grid::gridSize();
 
-    QVarLengthArray<QLineF, 100> lines; // It works faster than reserving. IDK why
-    for (int x = left; x < rect.right(); x += gridSize) {
-        lines.append(QLineF(x, rect.top(), x, rect.bottom()));
-    }
-    for (int y = top; y < rect.bottom(); y += gridSize) {
-        lines.append(QLineF(rect.left(), y, rect.right(), y));
-    }
+        int left = int(rect.left() - (int(rect.left()) % gridSize));
+        int top  = int(rect.top()  - (int(rect.top())  % gridSize));
 
-    painter->setPen(GridPen);
-    painter->drawLines(lines.data(), lines.size());
+        QVarLengthArray<QLineF, 100> lines; // It works faster than reserving. IDK why
+        for (int x = left; x < rect.right(); x += gridSize) {
+            lines.append(QLineF(x, rect.top(), x, rect.bottom()));
+        }
+        for (int y = top; y < rect.bottom(); y += gridSize) {
+            lines.append(QLineF(rect.left(), y, rect.right(), y));
+        }
+
+        painter->setPen(QPen(gridColor_, 0.5));
+        painter->drawLines(lines.data(), lines.size());
+    }
 
     QGraphicsView::drawBackground(painter, rect);
 }
@@ -76,11 +88,13 @@ void View::mouseMoveEvent(QMouseEvent *event)
 void View::mouseDoubleClickEvent(QMouseEvent *event)
 {
     QGraphicsView::mouseDoubleClickEvent(event);
-    if (itemAt(event->pos()) == nullptr) {
-        TextItem* textItem = new TextItem;
-        textItem->setPos(mapToScene(event->pos()) - textItem->boundingRect().center());
-        scene_->addItem(textItem);
-        textItem->enableTextEditing();
+    if (itemAt(event->pos()) == nullptr) {        
+        QPointF pos = mapToScene(event->pos());
+
+        AddCommand* addCommand = AddCommand::fromTextItem("", pos, scene_);
+        undoStack_->push(addCommand);
+
+        addCommand->textItem()->enableTextEditing();
     }
 }
 
@@ -99,21 +113,22 @@ void View::dropEvent(QDropEvent *event)
 {
     const auto* shapeItemMimeData = qobject_cast<const ShapeItemMimeData*>(event->mimeData());
     if (shapeItemMimeData) {
-        FlowchartShapeItem* item = nullptr;
-        if (shapeItemMimeData->figureType() == "Terminal") {
-            item = new Terminal;
-        } else if (shapeItemMimeData->figureType() == "Process") {
-            item = new Process;
-        } else if (shapeItemMimeData->figureType() == "Decision") {
-            item = new Decision;
-        } else if (shapeItemMimeData->figureType() == "Input/Output") {
-            item = new InOut;
-        }
-        if (item) {
-            item->setPos(mapToScene(event->pos()));
-            scene_->addItem(item);
-        }
+        QString shapeType = shapeItemMimeData->figureType();
+        QPointF pos = mapToScene(event->pos());
+
+        undoStack_->push(AddCommand::fromShapeItem(shapeType, pos, scene_));
     }
+}
+
+void View::addToUndoStackMoveCommand(QGraphicsItem *item, const QPointF &oldPos)
+{
+    undoStack_->push(new MoveCommand(item, oldPos));
+}
+
+void View::updateGridColor(QColor color)
+{
+    gridColor_ = color;
+    viewport()->update();
 }
 
 void View::showAndUpdateItemInfoLabels(FlowchartShapeItem *selectedItem)
@@ -157,12 +172,12 @@ void View::init()
     initFlags();
     initSomething();
     initLayout();
+    initActions();
     initConnection();
 }
 
 void View::initFlags()
 {
-    setViewportUpdateMode(FullViewportUpdate);
     setMouseTracking(true);
     setAcceptDrops(true);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -211,6 +226,17 @@ void View::initLayout()
     gLayout->setSpacing(0);
 
     setLayout(gLayout);
+}
+
+void View::initActions()
+{
+    undoAction_ = undoStack_->createUndoAction(this, tr("&Undo"));
+    undoAction_->setShortcut(QKeySequence::Undo);
+    this->addAction(undoAction_);
+
+    redoAction_ = undoStack_->createRedoAction(this, tr("&Redo"));
+    redoAction_->setShortcut(QKeySequence::Redo);
+    this->addAction(redoAction_);
 }
 
 void View::initConnection()

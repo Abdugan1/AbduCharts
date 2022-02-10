@@ -1,11 +1,11 @@
-#include "dockwidget.h"
+#include "itemlibrarydockkwidget.h"
 #include "itembutton.h"
 #include "flowchartitems.h"
 
 #include <QFrame>
 #include <QGridLayout>
 
-DockWidget::DockWidget(QWidget *parent)
+ItemLibraryDockWidget::ItemLibraryDockWidget(QWidget *parent)
     : QDockWidget(parent)
     , frame_(new QFrame)
     , gridLayout_(new QGridLayout)

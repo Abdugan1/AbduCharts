@@ -40,12 +40,13 @@ public:
 signals:
     void moved(FlowchartShapeItem* item);
 
-    void resized(FlowchartShapeItem* item,
-                 const QRectF& oldRect,
-                 const QRectF& currentRect);
+    void resizedByHands(FlowchartShapeItem* item,
+                        const QRectF& oldRect,
+                        const QRectF& currentRect);
 
     void selected(FlowchartShapeItem* item);
     void lostSelection(FlowchartShapeItem* item);
+    void pressed(FlowchartShapeItem* item);
     void released();
 
     void resizeHandleReleased();
@@ -122,6 +123,18 @@ class InOut : public FlowchartShapeItem
 public:
     explicit InOut(QGraphicsItem* parent = nullptr);
     QString figureType() const override;
+};
+
+
+//------------------------------------------------
+//                ShapeCreator
+//------------------------------------------------
+
+
+class ShapeCreator
+{
+public:
+    static FlowchartShapeItem* createShape(const QString& shapeType);
 };
 
 #endif // FLOWCHARTITEMS_H

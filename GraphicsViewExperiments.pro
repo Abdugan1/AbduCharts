@@ -9,10 +9,12 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    dockwidget.cpp \
+    colorpickerbutton.cpp \
     flowchartitems.cpp \
+    grid.cpp \
     guidelines.cpp \
     itembutton.cpp \
+    itemlibrarydockkwidget.cpp \
     itemresizer.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -20,22 +22,26 @@ SOURCES += \
     scene.cpp \
     shapeitembase.cpp \
     shapeitemdrag.cpp \
-    textitem.cpp \
+    textitems.cpp \
+    undocommands.cpp \
     uppertoolbar.cpp \
     view.cpp
 
 HEADERS += \
-    dockwidget.h \
+    colorpickerbutton.h \
     flowchartitems.h \
+    grid.h \
     guidelines.h \
     itembutton.h \
+    itemlibrarydockkwidget.h \
     itemresizer.h \
     mainwindow.h \
     resizehandle.h \
     scene.h \
     shapeitembase.h \
     shapeitemdrag.h \
-    textitem.h \
+    textitems.h \
+    undocommands.h \
     uppertoolbar.h \
     view.h
 

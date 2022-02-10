@@ -1,5 +1,6 @@
-#include "textitem.h"
+#include "textitems.h"
 #include "flowchartitems.h"
+#include "grid.h"
 
 #include <QGraphicsSceneMouseEvent>
 #include <QKeyEvent>
@@ -31,6 +32,7 @@ FlowchartTextItem::~FlowchartTextItem()
 
 void FlowchartTextItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
+    emit pressed(this);
     QGraphicsTextItem::mousePressEvent(event);
     emitCurrentFormattingChangedIfNecessary();
 }
@@ -40,6 +42,12 @@ void FlowchartTextItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     QGraphicsTextItem::mouseMoveEvent(event);
 
     emitCurrentFormattingChangedIfNecessary();
+}
+
+void FlowchartTextItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    emit released(this);
+    QGraphicsTextItem::mouseReleaseEvent(event);
 }
 
 void FlowchartTextItem::keyPressEvent(QKeyEvent *event)
@@ -56,7 +64,11 @@ bool FlowchartTextItem::isKeyThatCanChangeCursorPositionPressed(QKeyEvent *event
     return (isArrowKeyPressed(event->key())
             || (event->modifiers() == Qt::CTRL && event->key() == Qt::Key_A)
             || (event->key() == Qt::Key_Home)
-            || (event->key() == Qt::Key_End));
+            || (event->key() == Qt::Key_End)
+            || (QKeySequence(event->modifiers() + event->key()).matches(QKeySequence::Undo)
+                == QKeySequence::ExactMatch)
+            || (QKeySequence(event->modifiers() + event->key()).matches(QKeySequence::Redo)
+                == QKeySequence::ExactMatch));
 }
 
 bool FlowchartTextItem::isArrowKeyPressed(int key) const
@@ -188,7 +200,7 @@ FlowchartShapesTextItem::FlowchartShapesTextItem(FlowchartShapeItem *parent)
     : FlowchartTextItem(parent)
     , myItem_(parent)
 {
-    connect(parent, &FlowchartShapeItem::resized, this, &FlowchartShapesTextItem::centerOnShapeItem);
+    connect(parent, &FlowchartShapeItem::resizedByHands, this, &FlowchartShapesTextItem::centerOnShapeItem);
     connect(document(), &QTextDocument::contentsChanged, this, &FlowchartShapesTextItem::centerOnShapeItem);
 
     centerOnShapeItem();
@@ -243,11 +255,14 @@ TextItem::TextItem(QGraphicsItem *parent)
     : FlowchartTextItem(parent)
 {
     setPlainText("Im a TextItem!!!");
-    setFlags(ItemIsMovable | ItemIsSelectable);
+    setFlags(ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges);
 }
 
 QVariant TextItem::itemChange(GraphicsItemChange change, const QVariant &value)
 {
+    if (change == ItemPositionChange && Grid::enabled()) {
+        return Grid::snapToGrid(value.toPointF());
+    }
     if (change == ItemSelectedHasChanged && !value.toBool()) {
         qDebug() << "lost selection";
         disableTextEditing();

@@ -8,6 +8,10 @@ class QComboBox;
 class QTextCharFormat;
 class QTextBlockFormat;
 class QToolButton;
+class QCheckBox;
+class QSpinBox;
+
+class ColorPickerButton;
 
 class UpperToolBar : public QToolBar
 {
@@ -18,6 +22,10 @@ public:
 signals:
     void charFormatChanged(const QTextCharFormat& format);
     void blockFormatChanged(const QTextBlockFormat& format);
+
+    void gridSizeValueChanged();
+    void gridColorChanged(QColor color);
+    void gridEnabledChanged();
 
 public slots:
     void updateCharFormattingResponsiblePart(const QTextCharFormat& format);
@@ -34,8 +42,12 @@ private slots:
     void mergeAlignRight();
 
 private:
-    void addTextFormattingResponsiblePart();
-    void initTextFormattingResponsiblePart();
+    void setupTextFormattingPart();
+    void setupViewPart();
+
+    QWidget* textFormattingPartLayoutedWidget();
+
+    QWidget* viewPartLayoutedWidget();
 
 private:
     QFontComboBox* fontFamilyComboBox_  = nullptr;
@@ -48,6 +60,11 @@ private:
     QToolButton* textAlignLeft_     = nullptr;
     QToolButton* textAlignCenter_   = nullptr;
     QToolButton* textAlignRight_    = nullptr;
+
+    //
+    QCheckBox*          gridCheckBox_    = nullptr;
+    QSpinBox*           gridSizeSpinBox_ = nullptr;
+    ColorPickerButton*  gridColorButton_ = nullptr;
 };
 
 #endif // UPPERTOOLBAR_H

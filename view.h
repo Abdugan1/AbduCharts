@@ -5,6 +5,7 @@
 
 class Scene;
 class FlowchartShapeItem;
+class QUndoStack;
 
 class QLabel;
 
@@ -13,6 +14,7 @@ class View : public QGraphicsView
     Q_OBJECT
 public:
     explicit View(Scene *scene, QWidget *parent = nullptr);
+    ~View();
 
 protected:
     void drawBackground(QPainter *painter, const QRectF &rect) override;
@@ -24,6 +26,11 @@ protected:
     void dragEnterEvent(QDragEnterEvent* event) override;
     void dragMoveEvent(QDragMoveEvent *event) override;
     void dropEvent(QDropEvent* event) override;
+
+public slots:
+    void addToUndoStackMoveCommand(QGraphicsItem* item, const QPointF& oldPos);
+
+    void updateGridColor(QColor color);
 
 private slots:
     void showAndUpdateItemInfoLabels(FlowchartShapeItem* selectedItem);
@@ -38,6 +45,7 @@ private:
     void initFlags();
     void initSomething();
     void initLayout();
+    void initActions();
     void initConnection();
 
     void updateSelectedItemPositionLabel(FlowchartShapeItem* selectedItem);
@@ -54,7 +62,13 @@ private:
     QLabel* selectedItemFigureTypeLabel_ = nullptr;
     QLabel* selectedItemPositionLabel_   = nullptr;
 
+    QUndoStack* undoStack_ = nullptr;
+    QAction* undoAction_ = nullptr;
+    QAction* redoAction_ = nullptr;
+
     int numScheduledScalings_ = 0;
+
+    QColor gridColor_ = Qt::lightGray;
 };
 
 #endif // VIEW_H

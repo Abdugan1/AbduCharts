@@ -1,5 +1,5 @@
-#ifndef TEXTITEM_H
-#define TEXTITEM_H
+#ifndef TEXTITEMS_H
+#define TEXTITEMS_H
 
 #include <QGraphicsTextItem>
 #include <QTextCharFormat>
@@ -23,12 +23,16 @@ signals:
     void enabled(FlowchartTextItem* textItem);
     void disabled(FlowchartTextItem* textItem);
 
+    void pressed(FlowchartTextItem* textItem);
+    void released(FlowchartTextItem* textItem);
+
     void currentCharFormatChanged(const QTextCharFormat& format);
     void currentBlockFormatChanged(const QTextBlockFormat& format);
 
 protected:
-    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
-    void mouseMoveEvent(QGraphicsSceneMouseEvent* event)  override;
+    void mousePressEvent(QGraphicsSceneMouseEvent* event)   override;
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event)    override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 
     void keyPressEvent(QKeyEvent* event) override;
 
@@ -96,4 +100,4 @@ protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
 };
 
-#endif // TEXTITEM_H
+#endif // TEXTITEMS_H

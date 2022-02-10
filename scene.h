@@ -16,15 +16,19 @@ class Scene : public QGraphicsScene
     Q_OBJECT
 public:
     explicit Scene(const QRectF& sceneRect, QObject* parent = nullptr);
+    ~Scene();
 
     void addItem(FlowchartShapeItem* item);
     void addItem(FlowchartTextItem* item);
     void removeItem(FlowchartShapeItem* item);
+    void removeItem(FlowchartTextItem* item);
 
 signals:
     void itemSelected(FlowchartShapeItem* item);
     void itemLostSelection(FlowchartShapeItem* item);
     void itemMoved(FlowchartShapeItem* item);
+
+    void itemMovedAndReleased(QGraphicsItem* item, const QPointF& oldPos);
 
     void currentCharFormatChanged(const QTextCharFormat& format);
     void currentBlockFormatChanged(const QTextBlockFormat& format);
@@ -35,11 +39,15 @@ public slots:
     void applyBlockFormatOnCurrentTextItem(const QTextBlockFormat& format);
 
 private slots:
-    void onItemMoved(const FlowchartShapeItem* movedItem);
+    void onItemMoved(FlowchartShapeItem* movedItem);
 
-    void onItemResized(const FlowchartShapeItem* resizedItem,
-                       const QRectF& oldRect,
-                       const QRectF& currentRect);
+    void onItemResizedByHands(const FlowchartShapeItem* resizedItem,
+                              const QRectF& oldRect,
+                              const QRectF& currentRect);
+
+    void saveClickedItemInfo(QGraphicsItem* item);
+
+    void onItemReleased();
 
     void bringToFront(FlowchartShapeItem* item);
 
@@ -51,10 +59,19 @@ private:
     void connectSignalsOfShapeItem(FlowchartShapeItem* item);
     void connectSignalsOfTextItem(FlowchartTextItem* textItem);
 
+    void addPositionLines(const FlowchartShapeItem* movedItem);
+
+    void addSizeLines(const FlowchartShapeItem* resizedItem,
+                      const QRectF& oldRect,
+                      const QRectF& currentRect);
+
 private:
     QList<FlowchartShapeItem*> flowchartShapeItems_;
     QList<FlowchartTextItem*> textItems_;
     QList<GuideLine*> guideLines_;
+
+    QGraphicsItem* clickedItem_ = nullptr;
+    QPointF clickedItemOldPos_;
 };
 
 #endif // SCENE_H

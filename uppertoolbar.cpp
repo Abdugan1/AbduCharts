@@ -1,4 +1,6 @@
 #include "uppertoolbar.h"
+#include "colorpickerbutton.h"
+#include "grid.h"
 
 #include <QFontComboBox>
 #include <QTextCharFormat>
@@ -6,7 +8,12 @@
 #include <QLayout>
 #include <QToolButton>
 #include <QButtonGroup>
+#include <QCheckBox>
+#include <QSpinBox>
+#include <QColorDialog>
 #include <QDebug>
+
+const QColor DefaultGridColor = Qt::lightGray;
 
 UpperToolBar::UpperToolBar(QWidget *parent)
     : QToolBar(tr("UpperToolBar"), parent)
@@ -18,10 +25,18 @@ UpperToolBar::UpperToolBar(QWidget *parent)
     , textAlignLeft_(new QToolButton)
     , textAlignCenter_(new QToolButton)
     , textAlignRight_(new QToolButton)
+    , gridCheckBox_(new QCheckBox("&Grid"))
+    , gridSizeSpinBox_(new QSpinBox)
+    , gridColorButton_(new ColorPickerButton(DefaultGridColor))
 {
     setMovable(false);
 
-    addTextFormattingResponsiblePart();
+    setupTextFormattingPart();
+    setupViewPart();
+
+    addWidget(textFormattingPartLayoutedWidget());
+    addSeparator();
+    addWidget(viewPartLayoutedWidget());
 }
 
 void UpperToolBar::updateCharFormattingResponsiblePart(const QTextCharFormat &format)
@@ -109,49 +124,7 @@ void UpperToolBar::mergeAlignRight()
     emit blockFormatChanged(format);
 }
 
-void UpperToolBar::addTextFormattingResponsiblePart()
-{
-    initTextFormattingResponsiblePart();
-
-    auto createHorizontalSpacer = [=]() {
-        return new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-    };
-
-    QHBoxLayout* hLayout1 = new QHBoxLayout;
-    hLayout1->addWidget(fontFamilyComboBox_);
-    hLayout1->addWidget(fontSizeComboBox_);
-
-    QHBoxLayout* hLayout2 = new QHBoxLayout;
-    hLayout2->addWidget(textBoldButton_);
-    hLayout2->addWidget(textItalicButton_);
-    hLayout2->addWidget(textUnderlineButton_);
-    hLayout2->addWidget(textAlignLeft_);
-    hLayout2->addWidget(textAlignCenter_);
-    hLayout2->addWidget(textAlignRight_);
-
-    // temporary
-    QToolButton* button = new QToolButton;
-    button->setText("tmp spacing");
-    button->setEnabled(false);
-    button->setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum));
-    hLayout2->addWidget(button);
-//    hLayout2->addItem(new QSpacerItem(60, 20, QSizePolicy::Minimum, QSizePolicy::Minimum));
-
-    QVBoxLayout* vLayout = new QVBoxLayout;
-    vLayout->addLayout(hLayout1);
-    vLayout->addLayout(hLayout2);
-
-    QHBoxLayout* mainLayout = new QHBoxLayout;
-    mainLayout->addLayout(vLayout);
-    mainLayout->addItem(createHorizontalSpacer());
-
-
-    QFrame* widget = new QFrame;
-    widget->setLayout(mainLayout);
-    addWidget(widget);
-}
-
-void UpperToolBar::initTextFormattingResponsiblePart()
+void UpperToolBar::setupTextFormattingPart()
 {
     fontFamilyComboBox_->setInsertPolicy(QComboBox::NoInsert);
     fontFamilyComboBox_->setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed));
@@ -209,4 +182,69 @@ void UpperToolBar::initTextFormattingResponsiblePart()
     buttonGroup->addButton(textAlignLeft_);
     buttonGroup->addButton(textAlignCenter_);
     buttonGroup->addButton(textAlignRight_);
+}
+
+void UpperToolBar::setupViewPart()
+{
+    gridCheckBox_->setChecked(Grid::enabled());
+    connect(gridCheckBox_, &QCheckBox::stateChanged, this, [this](int state) {
+        Grid::setEnabled(state == Qt::Checked);
+        emit gridEnabledChanged();
+    });
+
+    gridSizeSpinBox_->setSuffix(" pt");
+    gridSizeSpinBox_->setMinimum(Grid::minGridSize());
+    gridSizeSpinBox_->setMaximum(Grid::maxGridSize());
+    gridSizeSpinBox_->setValue(Grid::gridSize());
+    connect(gridSizeSpinBox_, QOverload<int>::of(&QSpinBox::valueChanged), this, [this](int value) {
+        Grid::setGridSize(value);
+        emit gridSizeValueChanged();
+    });
+
+    connect(gridColorButton_, &ColorPickerButton::colorPicked,
+            this,             &UpperToolBar::gridColorChanged);
+}
+
+QWidget *UpperToolBar::textFormattingPartLayoutedWidget()
+{
+    QHBoxLayout* comboBoxesLayout = new QHBoxLayout;
+    comboBoxesLayout->addWidget(fontFamilyComboBox_);
+    comboBoxesLayout->addWidget(fontSizeComboBox_);
+
+    QHBoxLayout* textFormatButtonsLayout = new QHBoxLayout;
+    textFormatButtonsLayout->addWidget(textBoldButton_);
+    textFormatButtonsLayout->addWidget(textItalicButton_);
+    textFormatButtonsLayout->addWidget(textUnderlineButton_);
+    textFormatButtonsLayout->addWidget(textAlignLeft_);
+    textFormatButtonsLayout->addWidget(textAlignCenter_);
+    textFormatButtonsLayout->addWidget(textAlignRight_);
+
+    // temporary
+    QToolButton* button = new QToolButton;
+    button->setText("tmp spacing");
+    button->setEnabled(false);
+    button->setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum));
+    textFormatButtonsLayout->addWidget(button);
+//    textFormatButtonsLayout->addItem(new QSpacerItem(60, 20, QSizePolicy::Minimum, QSizePolicy::Minimum));
+
+    QVBoxLayout* mainLayout = new QVBoxLayout;
+    mainLayout->addLayout(comboBoxesLayout);
+    mainLayout->addLayout(textFormatButtonsLayout);
+
+    QWidget* widget = new QWidget;
+    widget->setLayout(mainLayout);
+    return widget;
+}
+
+QWidget *UpperToolBar::viewPartLayoutedWidget()
+{
+    QHBoxLayout* gridPartLayout = new QHBoxLayout;
+    gridPartLayout->addWidget(gridCheckBox_);
+    gridPartLayout->addWidget(gridSizeSpinBox_);
+    gridPartLayout->addWidget(gridColorButton_);
+
+    QWidget* widget = new QWidget;
+    widget->setLayout(gridPartLayout);
+
+    return widget;
 }
