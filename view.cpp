@@ -19,6 +19,10 @@ const QString CursorPositionText            = QObject::tr("Cursor position: (%1,
 const QString SelectedItemPositionText      = QObject::tr("Item position: (%1, %2)");
 const QString SelectedItemFigureTypeText    = QObject::tr("Figure type: %1");
 
+const qreal MaxScale  = 10.0;
+const qreal MinScale  = 0.25;
+const qreal ScaleStep = 0.15;
+
 View::View(Scene *scene, QWidget *parent)
     : QGraphicsView(scene, parent)
     , scene_(scene)
@@ -61,22 +65,40 @@ void View::drawBackground(QPainter *painter, const QRectF &rect)
 void View::wheelEvent(QWheelEvent *event)
 {
     if (event->modifiers() == Qt::CTRL) {
-        int numDegrees = event->delta() / 8;
-        qDebug() << "numDegrees:" << numDegrees;
-        int numSteps = numDegrees / 15;
-        numScheduledScalings_ += numSteps;
-        if (numScheduledScalings_ * numSteps < 0)
-            numScheduledScalings_ = numSteps;
-
-        QTimeLine* anim = new QTimeLine(350, this);
-        anim->setUpdateInterval(20);
-        connect(anim, &QTimeLine::valueChanged, this, &View::scalingTime);
-        connect(anim, &QTimeLine::finished, this, &View::animFinished);
-        anim->start();
+        if (event->delta() > 0) {
+            zoomIn();
+        } else {
+            zoomOut();
+        }
 
     } else {
         QGraphicsView::wheelEvent(event);
     }
+}
+
+void View::mousePressEvent(QMouseEvent *event)
+{
+    if (event->modifiers() == Qt::CTRL || event->button() == Qt::MiddleButton) {
+        setDragMode(ScrollHandDrag);
+        setInteractive(false);
+        QMouseEvent leftClick(QEvent::MouseButtonPress, event->pos(), Qt::LeftButton,
+                              event->buttons(), Qt::KeyboardModifiers());
+        QGraphicsView::mousePressEvent(&leftClick);
+
+    } else {
+        if (event->modifiers() == Qt::SHIFT) {
+            setDragMode(RubberBandDrag);
+        }
+
+        QGraphicsView::mousePressEvent(event);
+    }
+}
+
+void View::mouseReleaseEvent(QMouseEvent *event)
+{
+    QGraphicsView::mouseReleaseEvent(event);
+    setDragMode(NoDrag);
+    setInteractive(true);
 }
 
 void View::mouseMoveEvent(QMouseEvent *event)
@@ -131,6 +153,14 @@ void View::updateGridColor(QColor color)
     viewport()->update();
 }
 
+void View::zoom(qreal zoomRatio)
+{
+    qreal currentScaleRatio = transform().m11();
+    qreal scale = zoomRatio / currentScaleRatio;
+    this->scale(scale, scale);
+    emit scaleChanged(transform().m11());
+}
+
 void View::showAndUpdateItemInfoLabels(FlowchartShapeItem *selectedItem)
 {
     selectedItemPositionLabel_->show();
@@ -150,27 +180,10 @@ void View::updateItemInfoLabels(FlowchartShapeItem *selectedItem)
     updateSelectedItemPositionLabel(selectedItem);
 }
 
-void View::scalingTime(qreal x)
-{
-    qreal factor = 1.0f + qreal(numScheduledScalings_) / 300.0f;
-//    qDebug() << "factor:" << factor;
-    scale(factor, factor);
-}
-
-void View::animFinished()
-{
-    if (numScheduledScalings_ > 0) {
-        --numScheduledScalings_;
-    } else {
-        ++numScheduledScalings_;
-        sender()->deleteLater();
-    }
-}
-
 void View::init()
 {
     initFlags();
-    initSomething();
+    initFont();
     initLayout();
     initActions();
     initConnection();
@@ -185,7 +198,7 @@ void View::initFlags()
     setTransformationAnchor(AnchorUnderMouse);
 }
 
-void View::initSomething()
+void View::initFont()
 {
     QFont font = this->font();
     font.setPointSize(12);
@@ -195,10 +208,10 @@ void View::initSomething()
 void View::initLayout()
 {
     auto createHorizontalSpacer = [=]() {
-        return new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+        return new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
     };
     auto createVerticalSpacer = []() {
-        return new QSpacerItem(40, 20, QSizePolicy::Minimum, QSizePolicy::Expanding);
+        return new QSpacerItem(1, 1, QSizePolicy::Minimum, QSizePolicy::Expanding);
     };
 
     selectedItemFigureTypeLabel_->setAlignment(Qt::AlignRight);
@@ -246,6 +259,26 @@ void View::initConnection()
     connect(scene_, &Scene::itemMoved, this, &View::updateItemInfoLabels);
 
     connect(scene_, &Scene::itemLostSelection, this, &View::hideItemInfoLabels);
+}
+
+void View::zoomIn()
+{
+    qreal currentScale = transform().m11();
+    qreal resultScale = currentScale + ScaleStep;
+    resultScale = qMin(resultScale, MaxScale);
+    qreal scale = resultScale / currentScale;
+    this->scale(scale, scale);
+    emit scaleChanged(resultScale);
+}
+
+void View::zoomOut()
+{
+    qreal currentScale = transform().m11();
+    qreal resultScale = currentScale - ScaleStep;
+    resultScale = qMax(resultScale, MinScale);
+    qreal scale = resultScale / currentScale;
+    this->scale(scale, scale);
+    emit scaleChanged(resultScale);
 }
 
 void View::updateSelectedItemPositionLabel(FlowchartShapeItem *selectedItem)

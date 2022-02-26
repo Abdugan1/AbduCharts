@@ -5,6 +5,7 @@
 #include "textitems.h"
 
 #include "uppertoolbar.h"
+#include "bottomtoolbar.h"
 #include "itemlibrarydockkwidget.h"
 
 #include <QTextCursor>
@@ -18,7 +19,10 @@ MainWindow::MainWindow(QWidget *parent)
     , scene_(new Scene({-SceneWidth / 2, -SceneHeight / 2, SceneWidth, SceneHeight}, this))
     , view_(new View(scene_))
     , upperToolBar_(new UpperToolBar)
+    , bottomToolBar_(new BottomToolBar)
+    , itemLibraryDockWidget_(new ItemLibraryDockWidget)
 {
+    // UpperToolBar connect
     connect(upperToolBar_, &UpperToolBar::charFormatChanged,
             this,          &MainWindow::onCharFormatChanged);
 
@@ -34,6 +38,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(upperToolBar_,     &UpperToolBar::gridEnabledChanged,
             view_->viewport(), QOverload<>::of(&QWidget::update));
 
+    // BottomToolBar connect
+    connect(bottomToolBar_, &BottomToolBar::zoomChanged,
+            view_,          &View::zoom);
+
+    // Scene connect
     connect(scene_,        &Scene::currentCharFormatChanged,
             upperToolBar_, &UpperToolBar::updateCharFormattingResponsiblePart);
 
@@ -46,8 +55,14 @@ MainWindow::MainWindow(QWidget *parent)
     connect(scene_, &Scene::itemMovedAndReleased,
             view_,  &View::addToUndoStackMoveCommand);
 
-    addToolBar(upperToolBar_);
-    addDockWidget(Qt::LeftDockWidgetArea, new ItemLibraryDockWidget);
+    // View connect
+    connect(view_,          &View::scaleChanged,
+            bottomToolBar_, &BottomToolBar::updateZoomIndicators);
+
+    addToolBar(Qt::TopToolBarArea, upperToolBar_);
+    addToolBar(Qt::BottomToolBarArea, bottomToolBar_);
+
+    addDockWidget(Qt::LeftDockWidgetArea, itemLibraryDockWidget_);
     setCentralWidget(view_);
 }
 

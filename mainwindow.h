@@ -6,6 +6,8 @@
 class Scene;
 class View;
 class UpperToolBar;
+class BottomToolBar;
+class ItemLibraryDockWidget;
 class QTextCharFormat;
 class QTextBlockFormat;
 class FlowchartTextItem;
@@ -28,6 +30,9 @@ private:
     View*  view_  = nullptr;
 
     UpperToolBar* upperToolBar_ = nullptr;
+    BottomToolBar* bottomToolBar_ = nullptr;
+
+    ItemLibraryDockWidget* itemLibraryDockWidget_ = nullptr;
 };
 
 #endif // MAINWINDOW_H

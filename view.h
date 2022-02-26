@@ -16,10 +16,15 @@ public:
     explicit View(Scene *scene, QWidget *parent = nullptr);
     ~View();
 
+signals:
+    void scaleChanged(qreal scale);
+
 protected:
     void drawBackground(QPainter *painter, const QRectF &rect) override;
     void wheelEvent(QWheelEvent* event) override;
 
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseDoubleClickEvent(QMouseEvent *event) override;
 
@@ -32,21 +37,23 @@ public slots:
 
     void updateGridColor(QColor color);
 
+    void zoom(qreal zoomRatio);
+
 private slots:
     void showAndUpdateItemInfoLabels(FlowchartShapeItem* selectedItem);
     void hideItemInfoLabels();
     void updateItemInfoLabels(FlowchartShapeItem* selectedItem);
 
-    void scalingTime(qreal x);
-    void animFinished();
-
 private:
     void init();
     void initFlags();
-    void initSomething();
+    void initFont();
     void initLayout();
     void initActions();
     void initConnection();
+
+    void zoomIn();
+    void zoomOut();
 
     void updateSelectedItemPositionLabel(FlowchartShapeItem* selectedItem);
     void updateSelectedItemFigureTypeLabel(FlowchartShapeItem* selectedItem);
@@ -65,8 +72,6 @@ private:
     QUndoStack* undoStack_ = nullptr;
     QAction* undoAction_ = nullptr;
     QAction* redoAction_ = nullptr;
-
-    int numScheduledScalings_ = 0;
 
     QColor gridColor_ = Qt::lightGray;
 };
