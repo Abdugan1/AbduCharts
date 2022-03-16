@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/align_center.png</file>
+        <file>images/align_left.png</file>
+        <file>images/align_right.png</file>
+        <file>images/app_icon.ico</file>
+        <file>images/app_icon.png</file>
+        <file>images/bold.png</file>
+        <file>images/italic.png</file>
+        <file>images/minus.png</file>
+        <file>images/plus.png</file>
+        <file>images/redo.png</file>
+        <file>images/underline.png</file>
+        <file>images/undo.png</file>
+    </qresource>
+</RCC>
