@@ -4,8 +4,14 @@
 #include "editor/items/shapeitembase.h"
 #include "editor/resizehandle.h"
 
+#include <memory>
+
 class ItemResizer;
 class FlowchartShapesTextItem;
+class ConnectorHandle;
+enum class ConnectionSide;
+class ConnectorItemManager;
+class ConnectorItem;
 
 class QTextCharFormat;
 
@@ -37,6 +43,8 @@ public:
 
     FlowchartShapesTextItem *textItem() const;
 
+    void addConnectorItem(ConnectorItem* connectorItem);
+
 signals:
     void moved(FlowchartShapeItem* item);
 
@@ -51,6 +59,8 @@ signals:
 
     void resizeHandleReleased();
 
+    void connectorHandlePressed(ConnectorHandle* handle);
+
 private slots:
     void onResizeHandleMoved(ResizeHandle* resizeHandle, qreal dx, qreal dy);
 
@@ -62,7 +72,10 @@ protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
 
     void addResizeHandle(ResizeHandle::PositionFlags positionFlags);
-    void updateResizeHandlesPositions() const;
+    void updateResizeHandlesPositions();
+
+    void addConnectorHandle(ConnectionSide connectionSide);
+    void updateConnectorHandlesPositions();
 
     void initByShape(const QPainterPath& shape);
 
@@ -71,10 +84,14 @@ private:
 
 private:
     QList<ResizeHandle*> resizeHandles_;
+    QList<ConnectorHandle*> connectorHanldes_;
+
     QPainterPath shape_;
     ItemResizer* resizer_ = nullptr;
 
     FlowchartShapesTextItem* textItem_ = nullptr;
+
+   ConnectorItemManager* connectorItemManager_ = nullptr;
 };
 
 #endif // FLOWCHARTSHAPEITEM_H

@@ -7,6 +7,8 @@ class FlowchartShapeItem;
 class GuideLine;
 class PositionLine;
 class FlowchartTextItem;
+class ConnectorItem;
+class ConnectorHandle;
 
 class QTextCharFormat;
 class QTextBlockFormat;
@@ -53,6 +55,8 @@ private slots:
 
     void deleteAllGuidelines();
 
+    void doConnectorItem(const ConnectorHandle* handle);
+
 private:
     void addGuideLine(GuideLine* positionLine);
 
@@ -72,6 +76,8 @@ private:
 
     QGraphicsItem* clickedItem_ = nullptr;
     QPointF clickedItemOldPos_;
+
+    ConnectorItem* lastConnectorItem_ = nullptr;
 };
 
 #endif // SCENE_H

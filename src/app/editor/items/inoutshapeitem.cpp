@@ -17,5 +17,5 @@ InOutShapeItem::InOutShapeItem(QGraphicsItem *parent)
 
 QString InOutShapeItem::figureType() const
 {
-    return "Terminal";
+    return "Input/Output";
 }

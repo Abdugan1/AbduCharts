@@ -8,5 +8,6 @@ FlowchartShapeItem* ShapeItemCreator::createShape(const QString &shapeType)
     else if (shapeType == "Decision")      return (new DecisionShapeItem);
     else if (shapeType == "Input/Output")  return (new InOutShapeItem);
 
+    Q_UNREACHABLE();
     return nullptr;
 }
