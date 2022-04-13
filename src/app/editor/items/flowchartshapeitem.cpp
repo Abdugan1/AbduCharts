@@ -1,7 +1,7 @@
 #include "editor/items/flowchartshapeitem.h"
 #include "editor/resizehandle.h"
 #include "editor/itemresizer.h"
-#include "editor/connectorhandle.h"
+#include "editor/connectorpoint.h"
 #include "editor/connectoritemmanager.h"
 #include "editor/textitems.h"
 #include "editor/grid.h"
@@ -55,10 +55,10 @@ FlowchartShapeItem::FlowchartShapeItem(QGraphicsItem *parent)
                 this, &FlowchartShapeItem::resizeHandleReleased);
     }
 
-    addConnectorHandle(ConnectionSide::Top);
-    addConnectorHandle(ConnectionSide::Left);
-    addConnectorHandle(ConnectionSide::Bottom);
-    addConnectorHandle(ConnectionSide::Right);
+    addConnectorPoint(ConnectionSide::Top);
+    addConnectorPoint(ConnectionSide::Left);
+    addConnectorPoint(ConnectionSide::Bottom);
+    addConnectorPoint(ConnectionSide::Right);
 
     connectorItemManager_ = new ConnectorItemManager;
     connect(this, &FlowchartShapeItem::moved, connectorItemManager_,
@@ -120,7 +120,7 @@ void FlowchartShapeItem::onResizeHandleMoved(ResizeHandle *resizeHandle, qreal d
     prepareGeometryChange();
     resizer_->onHandleMoved(resizeHandle, dx, dy);
     updateResizeHandlesPositions();
-    updateConnectorHandlesPositions();
+    updateConnectorPointsPositions();
 }
 
 QVariant FlowchartShapeItem::itemChange(GraphicsItemChange change, const QVariant &value)
@@ -210,19 +210,19 @@ void FlowchartShapeItem::updateResizeHandlesPositions()
     }
 }
 
-void FlowchartShapeItem::addConnectorHandle(ConnectionSide connectionSide)
+void FlowchartShapeItem::addConnectorPoint(ConnectionSide connectionSide)
 {
-    auto connectorHandle = new ConnectorHandle(connectionSide, this);
-    connect(connectorHandle, &ConnectorHandle::pressed,
-            this,            &FlowchartShapeItem::connectorHandlePressed);
-    connectorHanldes_.append(connectorHandle);
+    auto connectorHandle = new ConnectorPoint(connectionSide, this);
+    connect(connectorHandle, &ConnectorPoint::pressed,
+            this,            &FlowchartShapeItem::connectorPointPressed);
+    connectorPoints_.append(connectorHandle);
 }
 
-void FlowchartShapeItem::updateConnectorHandlesPositions()
+void FlowchartShapeItem::updateConnectorPointsPositions()
 {
     const int margin = 20;
     const QRectF rect = contentRect();
-    for (auto handle : connectorHanldes_) {
+    for (auto handle : connectorPoints_) {
         switch (handle->connectionSide()) {
         case ConnectionSide::Top:
             handle->setPos(QPointF(rect.center().x(), rect.top() - margin));
@@ -245,7 +245,7 @@ void FlowchartShapeItem::initByShape(const QPainterPath &shape)
     setShape(shape);
     resizer_->setCompareRect(contentRect());
     updateResizeHandlesPositions();
-    updateConnectorHandlesPositions();
+    updateConnectorPointsPositions();
 }
 
 bool FlowchartShapeItem::textEditingEnabled() const

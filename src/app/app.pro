@@ -18,6 +18,7 @@ SOURCES += \
     editor/connectorhandle.cpp \
     editor/connectoritem.cpp \
     editor/connectoritemmanager.cpp \
+    editor/connectorpoint.cpp \
     editor/grid.cpp \
     editor/guidelines.cpp \
     editor/itemresizer.cpp \
@@ -50,6 +51,7 @@ HEADERS += \
     editor/connectorhandle.h \
     editor/connectoritem.h \
     editor/connectoritemmanager.h \
+    editor/connectorpoint.h \
     editor/grid.h \
     editor/guidelines.h \
     editor/itemresizer.h \

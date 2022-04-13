@@ -11,10 +11,20 @@ enum class ConnectionSide : int
     Right
 };
 
-struct ShapeInfo
+class ShapeInfo
 {
-    QGraphicsItem* item = nullptr;
-    ConnectionSide side;
+public:
+    explicit ShapeInfo(QGraphicsItem* item = nullptr,
+                       ConnectionSide connectionSide = ConnectionSide::Top);
+    QGraphicsItem *item() const;
+    void setItem(QGraphicsItem *item);
+
+    ConnectionSide connectionSide() const;
+    void setConnectionSide(const ConnectionSide &connectionSide);
+
+private:
+    QGraphicsItem* item_ = nullptr;
+    ConnectionSide connectionSide_;
 
 };
 

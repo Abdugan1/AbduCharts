@@ -2,7 +2,7 @@
 #include "editor/items/flowchartshapeitems.h"
 #include "editor/textitems.h"
 #include "editor/guidelines.h"
-#include "editor/connectorhandle.h"
+#include "editor/connectorpoint.h"
 #include "editor/connectoritem.h"
 
 #include <QTextCharFormat>
@@ -114,7 +114,7 @@ void Scene::deleteAllGuidelines()
     guideLines_.clear();
 }
 
-void Scene::doConnectorItem(const ConnectorHandle *handle)
+void Scene::doConnectorItem(const ConnectorPoint *handle)
 {
     if (!lastConnectorItem_) {
         lastConnectorItem_ = new ConnectorItem;
@@ -149,7 +149,7 @@ void Scene::connectSignalsOfShapeItem(FlowchartShapeItem *item)
     connect(item, &FlowchartShapeItem::moved,                  this, &Scene::itemMoved);
     connect(item, &FlowchartShapeItem::lostSelection,          this, &Scene::itemLostSelection);
     connect(item, &FlowchartShapeItem::resizeHandleReleased,   this, &Scene::deleteAllGuidelines);
-    connect(item, &FlowchartShapeItem::connectorHandlePressed, this, &Scene::doConnectorItem);
+    connect(item, &FlowchartShapeItem::connectorPointPressed, this, &Scene::doConnectorItem);
 }
 
 void Scene::connectSignalsOfTextItem(FlowchartTextItem *textItem)

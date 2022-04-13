@@ -30,7 +30,7 @@ void PointGraph::connect(const QPointF &a, const QPointF &b)
     Node* nodeA = nodes_[a.x()][a.y()];
     Node* nodeB = nodes_[b.x()][b.y()];
 
-    nodeA->neighbours.push_back(nodeB);
+    nodeA->appendNeighbour(nodeB);
 }
 
 Node *PointGraph::get(const QPointF &point) const

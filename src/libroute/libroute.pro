@@ -10,11 +10,21 @@ HEADERS += \
     grid.h \
     node.h \
     orthogonalconnector.h \
+    orthogonalconnectorauto.h \
+    orthogonalconnectorfunctions.h \
+    orthogonalconnectormanual.h \
     pointgraph.h \
-    shapeinfo.h
+    shapeinfo.h \
+    waypoint.h
 
 SOURCES += \
     astar.cpp \
     grid.cpp \
+    node.cpp \
     orthogonalconnector.cpp \
-    pointgraph.cpp
+    orthogonalconnectorauto.cpp \
+    orthogonalconnectorfunctions.cpp \
+    orthogonalconnectormanual.cpp \
+    pointgraph.cpp \
+    shapeinfo.cpp \
+    waypoint.cpp

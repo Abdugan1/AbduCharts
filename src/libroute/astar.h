@@ -15,9 +15,13 @@ public:
     static void solveAStar(Node* startNode, Node* endNode);
 
 private:
-    static float distance(Node* a, Node* b);
+    static float distance(const Node* a, const Node* b);
 
-    static float calculateLocalGoal(Node* a, Node* b);
+    static float calculateLocalGoal(const Node* a, const Node* b);
+
+    static bool isTurned(const Node* a, const Node* b);
+    static bool isTurned(const Node* before, const Node* current, const Node* after);
+
 
     static QList<QLineF> makePath(Node* endNode);
 

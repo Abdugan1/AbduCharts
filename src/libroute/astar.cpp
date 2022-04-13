@@ -22,8 +22,8 @@ void AStar::solveAStar(Node *startNode, Node *endNode)
 
     // Setup starting conditions
     Node* currentNode  = startNode;
-    startNode->localGoal = 0.0f;
-    startNode->globalGoal = heuristic(startNode, endNode);
+    startNode->setLocalGoal(0.0f);
+    startNode->setGlobalGoal(heuristic(startNode, endNode));
 
     QList<Node*> notTestedNodes;
     notTestedNodes.push_back(startNode);
@@ -32,12 +32,12 @@ void AStar::solveAStar(Node *startNode, Node *endNode)
 
         // Sort untesded nodes by global goal, so lowest is first
         std::sort(notTestedNodes.begin(), notTestedNodes.end(), [](const Node* lhs, const Node* rhs) {
-            return lhs->globalGoal < rhs->globalGoal;
+            return lhs->globalGoal() < rhs->globalGoal();
         });
 
         // Front of notTestedNodes is potentially the lowest distance node.
         // Out list may also contain that have been visited, so ditch these..
-        while (!notTestedNodes.empty() && notTestedNodes.front()->visited)
+        while (!notTestedNodes.empty() && notTestedNodes.front()->visited())
             notTestedNodes.pop_front();
 
         // ... or abort because there are no valid nodes to test
@@ -45,55 +45,74 @@ void AStar::solveAStar(Node *startNode, Node *endNode)
             break;
 
         currentNode = notTestedNodes.front();
-        currentNode->visited = true; // Only explore a node once
+        currentNode->setVisited(true); // Only explore a node once
 
-        for (auto neighbourNode : qAsConst(currentNode->neighbours)) {
-            if (!neighbourNode->visited)
+        for (auto neighbourNode : currentNode->neighbours()) {
+            if (!neighbourNode->visited())
                 notTestedNodes.push_back(neighbourNode);
 
             float possiblyLowerGoal = calculateLocalGoal(currentNode, neighbourNode);
 
-            if (possiblyLowerGoal < neighbourNode->localGoal) {
-                neighbourNode->parent = currentNode;
-                neighbourNode->localGoal = possiblyLowerGoal;
-                neighbourNode->globalGoal = neighbourNode->localGoal + heuristic(neighbourNode, endNode);
+            if (possiblyLowerGoal < neighbourNode->localGoal()) {
+                neighbourNode->setParent(currentNode);
+                neighbourNode->setLocalGoal(possiblyLowerGoal);
+                neighbourNode->setGlobalGoal(neighbourNode->localGoal() + heuristic(neighbourNode, endNode));
             }
         }
     }
 }
 
-float AStar::distance(Node *a, Node *b)
+float AStar::distance(const Node *a, const Node *b)
 {
-    return qSqrt((a->x - b->x) * (a->x - b->x) + (a->y - b->y) * (a->y - b->y));
+    return qSqrt((a->x() - b->x()) * (a->x() - b->x()) + (a->y() - b->y()) * (a->y() - b->y()));
 }
 
-float AStar::calculateLocalGoal(Node *a, Node *b)
+float AStar::calculateLocalGoal(const Node *a, const Node *b)
 {
-    float localGoal = a->localGoal + distance(a, b);
+    float localGoal = a->localGoal() + distance(a, b);
 
     // Avoid segmenting
-    if (a->parent) {
-        bool turned = false;
-        if (a->x == a->parent->x) {
-            turned = (b->x != a->x);
-        } else {
-            turned = (b->y != a->y);
-        }
-        localGoal += StepPenalty * turned;
-    }
+    localGoal += StepPenalty * isTurned(a, b);
 
     return localGoal;
+}
+
+bool AStar::isTurned(const Node *a, const Node *b)
+{
+    return isTurned(a->parent(), a, b);
+}
+
+bool AStar::isTurned(const Node *before, const Node *current, const Node *after)
+{
+    bool turned = false;
+    if (before) {
+        if (current->x() == before->x()) {
+            turned = (after->x() != current->x());
+        } else {
+            turned = (after->y() != current->y());
+        }
+    }
+    return turned;
 }
 
 QList<QLineF> AStar::makePath(Node *endNode)
 {
     QList<QLineF> path;
     if (endNode != nullptr) {
-        Node* p = endNode;
-        while (p->parent != nullptr) {
-            path.push_back(QLineF{QPointF(p->x, p->y), QPointF(p->parent->x, p->parent->y)});
-            p = p->parent;
+        Node* current = endNode;
+        Node* before  = endNode;
+        while (auto after = current->parent()) {
+
+            if (isTurned(before, current, after)) {
+                if (QPointF(before->x(), before->y()) != QPointF(current->x(), current->y()))
+                    path.push_back({QPointF(before->x(), before->y()), QPointF(current->x(), current->y())});
+                before = current;
+            }
+            current = after;
         }
+
+        // last connection
+        path.push_back({QPointF(before->x(), before->y()), QPointF(current->x(), current->y())});
     }
     return path;
 }

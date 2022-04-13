@@ -1,71 +1,85 @@
-#include "editor/connectorhandle.h"
+#include "connectorhandle.h"
+#include "grid.h"
+
+#include "libroute/waypoint.h"
 
 #include <QPainter>
-#include <QStyleOptionGraphicsItem>
+#include <QGraphicsSceneMouseEvent>
+#include <QDebug>
 
 constexpr qreal Width  = 10.0f;
 constexpr qreal Height = 10.0f;
 
-ConnectorHandle::ConnectorHandle(ConnectionSide side, QGraphicsItem *parent)
+ConnectorHandle::ConnectorHandle(const QLineF &line, int lineIndexInList, QGraphicsItem *parent)
     : ShapeItemBase(parent)
+    , lineIndex_(lineIndexInList)
+    , moveOrientation_(getOrientationFromLine(line))
 {
-    shapeInfo_.side = side;
-    shapeInfo_.item = parent;
-
-    setAcceptHoverEvents(true);
-    setCursor(Qt::PointingHandCursor);
-
-    const int m = 5;
-    setMargins(QMarginsF(m, m, m, m));
+    setFlag(ItemIsMovable);
 }
 
 QRectF ConnectorHandle::boundingRect() const
 {
-    return contentRect() + margins();
+    return QRectF(-Width / 2, -Height / 2, Width, Height);
 }
 
 QRectF ConnectorHandle::contentRect() const
 {
-    return QRectF(-Width / 2, -Height / 2, Width, Height);
+    return boundingRect() + margins();
 }
 
 void ConnectorHandle::paint(QPainter *painter,
                             const QStyleOptionGraphicsItem *option,
                             QWidget *widget)
 {
+    Q_UNUSED(option)
     Q_UNUSED(widget)
 
-    const QRectF innerRect = contentRect();
+    painter->setPen(QPen(Qt::white));
+    painter->setBrush(QBrush(QColor(41, 182, 242)));
+    painter->drawEllipse(contentRect());
+}
 
-    if (option->state & QStyle::State_MouseOver) {
-        const int m = 3;
-        const QRectF outerRect = innerRect + QMarginsF(m, m, m, m);
-        painter->setPen(Qt::green);
-        painter->drawEllipse(outerRect);
+void ConnectorHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+    QPointF oldPos = scenePos();
+    QPointF newPos = Grid::enabled() ? Grid::snapToGrid(event->scenePos())
+                                     : event->scenePos();
+    newPos = restrictedPosition(oldPos, newPos);
+    if (newPos != oldPos) {
+        qDebug() << "newPos:" << newPos;
+        emit moved(this, newPos);
     }
-
-    painter->setPen(QPen(Qt::lightGray));
-    painter->setBrush(QBrush(Qt::lightGray));
-    painter->drawEllipse(innerRect);
 }
 
-ConnectionSide ConnectorHandle::connectionSide() const
+MoveOrientation ConnectorHandle::getOrientationFromLine(const QLineF &line) const
 {
-    return shapeInfo_.side;
+    return (line.p1().x() == line.p2().x() ? MoveOrientation::LeftRight: MoveOrientation::UpDown);
 }
 
-QGraphicsItem *ConnectorHandle::item() const
+QPointF ConnectorHandle::restrictedPosition(const QPointF &oldPos, const QPointF &newPos)
 {
-    return shapeInfo_.item;
+    QPointF output = oldPos;
+
+    if (moveOrientation_ == MoveOrientation::UpDown)
+        output.setY(newPos.y());
+    else
+        output.setX(newPos.x());
+
+    return output;
 }
 
-ShapeInfo ConnectorHandle::shapeInfo() const
+MoveOrientation ConnectorHandle::moveOrientation() const
 {
-    return shapeInfo_;
+    return moveOrientation_;
 }
 
-void ConnectorHandle::mousePressEvent(QGraphicsSceneMouseEvent *event)
+int ConnectorHandle::lineIndex() const
 {
-    ShapeItemBase::mousePressEvent(event);
-    emit pressed(this);
+    return lineIndex_;
+}
+
+void ConnectorHandle::setLineIndex(int lineIndex)
+{
+    lineIndex_ = lineIndex;
 }

@@ -8,7 +8,7 @@
 
 class ItemResizer;
 class FlowchartShapesTextItem;
-class ConnectorHandle;
+class ConnectorPoint;
 enum class ConnectionSide;
 class ConnectorItemManager;
 class ConnectorItem;
@@ -59,7 +59,7 @@ signals:
 
     void resizeHandleReleased();
 
-    void connectorHandlePressed(ConnectorHandle* handle);
+    void connectorPointPressed(ConnectorPoint* point);
 
 private slots:
     void onResizeHandleMoved(ResizeHandle* resizeHandle, qreal dx, qreal dy);
@@ -74,8 +74,8 @@ protected:
     void addResizeHandle(ResizeHandle::PositionFlags positionFlags);
     void updateResizeHandlesPositions();
 
-    void addConnectorHandle(ConnectionSide connectionSide);
-    void updateConnectorHandlesPositions();
+    void addConnectorPoint(ConnectionSide connectionSide);
+    void updateConnectorPointsPositions();
 
     void initByShape(const QPainterPath& shape);
 
@@ -84,7 +84,7 @@ private:
 
 private:
     QList<ResizeHandle*> resizeHandles_;
-    QList<ConnectorHandle*> connectorHanldes_;
+    QList<ConnectorPoint*> connectorPoints_;
 
     QPainterPath shape_;
     ItemResizer* resizer_ = nullptr;

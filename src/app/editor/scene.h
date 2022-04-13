@@ -8,7 +8,7 @@ class GuideLine;
 class PositionLine;
 class FlowchartTextItem;
 class ConnectorItem;
-class ConnectorHandle;
+class ConnectorPoint;
 
 class QTextCharFormat;
 class QTextBlockFormat;
@@ -55,7 +55,7 @@ private slots:
 
     void deleteAllGuidelines();
 
-    void doConnectorItem(const ConnectorHandle* handle);
+    void doConnectorItem(const ConnectorPoint* handle);
 
 private:
     void addGuideLine(GuideLine* positionLine);
