@@ -68,46 +68,6 @@ QList<QLineF> OrthogonalConnectorAuto::route(const ShapeInfo &startShapeInfo,
     return AStar::findPath(endNode, startNode);
 }
 
-PointGraph OrthogonalConnectorAuto::routePointGraph(const ShapeInfo &startShapeInfo, const ShapeInfo &endShapeInfo)
-{
-    QRectF startItemBoundingRect = inflatedBoundingRect(startShapeInfo.item());
-    QRectF endItemBoundingRect   = inflatedBoundingRect(endShapeInfo.item());
-
-    QRectF boundingRect = getOverallBoundingRect(startItemBoundingRect,
-                                                 endItemBoundingRect);
-
-    QList<double> verticals   = getVerticalRulersFromItems(startItemBoundingRect,   endItemBoundingRect);
-    QList<double> horizontals = getHorizontalRulersFromItems(startItemBoundingRect, endItemBoundingRect);
-
-    // add origin points
-    double startOrigin = (isVerticalSide(startShapeInfo.connectionSide()) ? startItemBoundingRect.center().x()
-                                                              : startItemBoundingRect.center().y());
-
-    double endOrigin = (isVerticalSide(endShapeInfo.connectionSide()) ? endItemBoundingRect.center().x()
-                                                          : endItemBoundingRect.center().y());
-
-    (isVerticalSide(startShapeInfo.connectionSide()) ? verticals : horizontals).push_back(startOrigin);
-    (isVerticalSide(endShapeInfo.connectionSide())   ? verticals : horizontals).push_back(endOrigin);
-
-    std::sort(verticals.begin(),   verticals.end());
-    std::sort(horizontals.begin(), horizontals.end());
-
-    Grid grid = rulersToGrid(verticals, horizontals, boundingRect);
-    QList<QPointF> gridPoints = gridToSpots(grid, {startItemBoundingRect, endItemBoundingRect});
-
-    QPointF startConnectionPoint = getConnectionPoint(startItemBoundingRect, startShapeInfo.connectionSide());
-    QPointF endConnectionPoint   = getConnectionPoint(endItemBoundingRect,   endShapeInfo.connectionSide());
-
-    gridPoints << startConnectionPoint << endConnectionPoint;
-
-    PointGraph pointGraph = createPointGraph(gridPoints);
-
-    Node* startNode = pointGraph.get(startConnectionPoint);
-    Node* endNode   = pointGraph.get(endConnectionPoint);
-
-    return pointGraph;
-}
-
 QList<double> OrthogonalConnectorAuto::getVerticalRulersFromItems(const QRectF &startItemBoundingRect,
                                                                   const QRectF &endItemBoundingRect)
 {

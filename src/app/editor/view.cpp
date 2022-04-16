@@ -1,10 +1,10 @@
 #include "editor/view.h"
 #include "editor/scene.h"
 #include "editor/items/flowchartshapeitems.h"
-#include "editor/textitems.h"
+#include "editor/items/flowcharttextitems.h"
 #include "editor/grid.h"
 #include "ui/shapeitemdrag.h"
-#include "ui/undocommands.h"
+#include "editor/undo_commands/undocommands.h"
 
 #include <QWheelEvent>
 #include <QTimeLine>
@@ -115,13 +115,12 @@ void View::mouseDoubleClickEvent(QMouseEvent *event)
 
         AddCommand* addCommand = AddCommand::fromTextItem("", pos, scene_);
         undoStack_->push(addCommand);
-
-        addCommand->textItem()->enableTextEditing();
     }
 }
 
 void View::dragEnterEvent(QDragEnterEvent *event)
 {
+    qDebug() << "mime type:" << ShapeItemMimeData::mimeType();
     if (event->mimeData()->hasFormat(ShapeItemMimeData::mimeType()))
         event->acceptProposedAction();
 }
@@ -135,10 +134,14 @@ void View::dropEvent(QDropEvent *event)
 {
     const auto* shapeItemMimeData = qobject_cast<const ShapeItemMimeData*>(event->mimeData());
     if (shapeItemMimeData) {
-        QString shapeType = shapeItemMimeData->figureType();
+        int itemType = shapeItemMimeData->itemType();
         QPointF pos = mapToScene(event->pos());
 
-        undoStack_->push(AddCommand::fromShapeItem(shapeType, pos, scene_));
+        for (auto item : scene_->selectedItems()) {
+            item->setSelected(false);
+        }
+
+        undoStack_->push(AddCommand::fromShapeItem(itemType, pos, scene_));
     }
 }
 
@@ -170,6 +173,28 @@ void View::zoom(qreal zoomRatio)
     qreal scale = zoomRatio / currentScaleRatio;
     this->scale(scale, scale);
     emit scaleChanged(transform().m11());
+}
+
+void View::deleteSelectedItem()
+{
+    qDebug() << "View::deleteSelectedItem";
+    auto selectedItems = scene_->selectedItems();
+    QGraphicsItem* selectedItem = (selectedItems.empty() ? nullptr : selectedItems.first());
+    if (selectedItem) {
+        qDebug() << "Has selected item";
+        DeleteCommand* deleteCommand = nullptr;
+        if (auto shapeItem = dynamic_cast<FlowchartShapeItem*>(selectedItem)) {
+            qDebug() << "deleteSelectedItem: Deleting shape item";
+            deleteCommand = DeleteCommand::fromShapeItem(shapeItem, scene_);
+
+        } else if (auto textItem = dynamic_cast<FlowchartTextItem*>(selectedItem)) {
+            qDebug() << "deleteSelectedItem: Deleting text item";
+            deleteCommand = DeleteCommand::fromTextItem(textItem, scene_);
+        }
+
+        if (deleteCommand)
+            undoStack_->push(deleteCommand);
+    }
 }
 
 void View::showAndUpdateItemInfoLabels(FlowchartShapeItem *selectedItem)
@@ -301,7 +326,7 @@ void View::updateSelectedItemPositionLabel(FlowchartShapeItem *selectedItem)
 
 void View::updateSelectedItemFigureTypeLabel(FlowchartShapeItem *selectedItem)
 {
-    selectedItemFigureTypeLabel_->setText(SelectedItemFigureTypeText.arg(selectedItem->figureType()));
+//    selectedItemFigureTypeLabel_->setText(SelectedItemFigureTypeText.arg(selectedItem->figureType()));
 }
 
 void View::updateCursorPositionLabel(const QPoint &pos)

@@ -5,9 +5,10 @@
 #include "editor/scene.h"
 #include "editor/view.h"
 #include "editor/items/flowchartshapeitem.h"
-#include "editor/textitems.h"
+#include "editor/items/flowcharttextitem.h"
 
 #include <QTextCursor>
+#include <QMenuBar>
 #include <QDebug>
 
 const qreal SceneWidth  = 1000.0f;
@@ -20,6 +21,40 @@ MainWindow::MainWindow(QWidget *parent)
     , upperToolBar_(new UpperToolBar)
     , bottomToolBar_(new BottomToolBar)
     , itemLibraryDockWidget_(new ItemLibraryDockWidget)
+{
+    init();
+}
+
+void MainWindow::onCharFormatChanged(const QTextCharFormat &format)
+{
+    view_->setFocus(Qt::OtherFocusReason);
+    scene_->applyCharFormatOnCurrentTextItem(format);
+}
+
+void MainWindow::onBlockFormatChanged(const QTextBlockFormat &format)
+{
+    view_->setFocus(Qt::OtherFocusReason);
+    scene_->applyBlockFormatOnCurrentTextItem(format);
+}
+
+void MainWindow::updateUpperToolbarFormattingResponsiblePart(FlowchartTextItem *textItem)
+{
+    qDebug() << "MainWindow: Updating toolbars text format part";
+    QTextCharFormat  charFormat = textItem->textCursor().charFormat();
+    QTextBlockFormat blockFormat = textItem->textCursor().blockFormat();
+    upperToolBar_->updateCharFormattingResponsiblePart(charFormat);
+    upperToolBar_->updateBlockFormattingResponsiblePart(blockFormat);
+}
+
+void MainWindow::init()
+{
+    initConnections();
+    initActions();
+    initMenus();
+    initUi();
+}
+
+void MainWindow::initConnections()
 {
     // UpperToolBar connect
     connect(upperToolBar_, &UpperToolBar::charFormatChanged,
@@ -64,30 +99,31 @@ MainWindow::MainWindow(QWidget *parent)
     connect(view_,          &View::scaleChanged,
             bottomToolBar_, &BottomToolBar::updateZoomIndicators);
 
+    connect(this,  &MainWindow::deleteActionTriggered,
+            view_, &View::deleteSelectedItem);
+}
+
+void MainWindow::initActions()
+{
+    deleteAction_ = new QAction("&Delete", this);
+    deleteAction_->setShortcut(QKeySequence::Delete);
+    connect(deleteAction_, &QAction::triggered, this, [this]() {
+        qDebug() << "Edit->Delete action triggered";
+        emit deleteActionTriggered();
+    });
+}
+
+void MainWindow::initMenus()
+{
+    editMenu_ = menuBar()->addMenu("&Edit");
+    editMenu_->addAction(deleteAction_);
+}
+
+void MainWindow::initUi()
+{
     addToolBar(Qt::TopToolBarArea, upperToolBar_);
     addToolBar(Qt::BottomToolBarArea, bottomToolBar_);
 
     addDockWidget(Qt::LeftDockWidgetArea, itemLibraryDockWidget_);
     setCentralWidget(view_);
-}
-
-void MainWindow::onCharFormatChanged(const QTextCharFormat &format)
-{
-    view_->setFocus(Qt::OtherFocusReason);
-    scene_->applyCharFormatOnCurrentTextItem(format);
-}
-
-void MainWindow::onBlockFormatChanged(const QTextBlockFormat &format)
-{
-    view_->setFocus(Qt::OtherFocusReason);
-    scene_->applyBlockFormatOnCurrentTextItem(format);
-}
-
-void MainWindow::updateUpperToolbarFormattingResponsiblePart(FlowchartTextItem *textItem)
-{
-    qDebug() << "updating!!!";
-    QTextCharFormat  charFormat = textItem->textCursor().charFormat();
-    QTextBlockFormat blockFormat = textItem->textCursor().blockFormat();
-    upperToolBar_->updateCharFormattingResponsiblePart(charFormat);
-    upperToolBar_->updateBlockFormattingResponsiblePart(blockFormat);
 }

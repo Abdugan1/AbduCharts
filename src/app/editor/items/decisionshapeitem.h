@@ -7,9 +7,11 @@ class DecisionShapeItem : public FlowchartShapeItem
 {
     Q_OBJECT
 public:
+    enum { Type = UserType + 11 };
+
     explicit DecisionShapeItem(QGraphicsItem* parent = nullptr);
 
-    QString figureType() const override;
+    int type() const override;
 };
 
 #endif // DECISIONSHAPEITEM_H

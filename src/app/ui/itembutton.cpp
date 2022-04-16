@@ -1,12 +1,13 @@
 #include "ui/itembutton.h"
 #include "ui/shapeitemdrag.h"
 #include "editor/items/flowchartshapeitem.h"
+#include "editor/items/shapeitemcreator.h"
 
 #include <QMouseEvent>
 #include <QApplication>
 #include <QPainter>
 
-QPixmap getPixmapFromShapeItem(const FlowchartShapeItem& shapeItem)
+QPixmap getPixmapFromShapeItem(int itemType)
 {
     QPixmap pixmap(FlowchartShapeItem::DefaultSize::Width,
                    FlowchartShapeItem::DefaultSize::Height);
@@ -20,19 +21,20 @@ QPixmap getPixmapFromShapeItem(const FlowchartShapeItem& shapeItem)
 
     painter.setPen(QPen(Qt::black, 4));
     painter.setBrush(Qt::white);
-    painter.drawPath(shapeItem.shape());
+    FlowchartShapeItem* item = ShapeItemCreator::createShape(itemType);
+    painter.drawPath(item->shape());
 
     return pixmap;
 }
 
-ItemButton::ItemButton(const FlowchartShapeItem &shapeItem, QWidget *parent)
+ItemButton::ItemButton(int itemType, QWidget *parent)
     : QToolButton(parent)
-    , figureType_(shapeItem.figureType())
+    , itemType_(itemType)
 {
     int size = 48;
     setFixedSize(size, size);
     setIconSize({size, size});
-    setIcon(getPixmapFromShapeItem(shapeItem));
+    setIcon(getPixmapFromShapeItem(itemType));
 }
 
 void ItemButton::mousePressEvent(QMouseEvent *event)
@@ -50,7 +52,7 @@ void ItemButton::mouseMoveEvent(QMouseEvent *event)
         return;
 
     ShapeItemDrag* drag = new ShapeItemDrag(this);
-    drag->setFigureType(figureType_);
+    drag->setItemType(itemType_);
     QPixmap pixmap = icon().pixmap(iconSize());
     drag->setPixmap(pixmap);
     drag->setHotSpot(pixmap.rect().center());

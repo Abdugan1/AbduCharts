@@ -42,6 +42,8 @@ public slots:
 
     void zoom(qreal zoomRatio);
 
+    void deleteSelectedItem();
+
 private slots:
     void showAndUpdateItemInfoLabels(FlowchartShapeItem* selectedItem);
     void hideItemInfoLabels();

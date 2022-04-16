@@ -3,7 +3,7 @@
 #include "editor/itemresizer.h"
 #include "editor/connectorpoint.h"
 #include "editor/connectoritemmanager.h"
-#include "editor/textitems.h"
+#include "editor/items/flowchartshapestextitem.h"
 #include "editor/grid.h"
 
 
@@ -80,6 +80,11 @@ QRectF FlowchartShapeItem::boundingRect() const
 QRectF FlowchartShapeItem::contentRect() const
 {
     return shape_.boundingRect();
+}
+
+int FlowchartShapeItem::type() const
+{
+    return Type;
 }
 
 QPainterPath FlowchartShapeItem::shape() const

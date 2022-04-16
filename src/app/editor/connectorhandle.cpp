@@ -5,6 +5,7 @@
 
 #include <QPainter>
 #include <QGraphicsSceneMouseEvent>
+#include <QCursor>
 #include <QDebug>
 
 constexpr qreal Width  = 10.0f;
@@ -16,6 +17,8 @@ ConnectorHandle::ConnectorHandle(const QLineF &line, int lineIndexInList, QGraph
     , moveOrientation_(getOrientationFromLine(line))
 {
     setFlag(ItemIsMovable);
+
+    setCursor(moveOrientation_ == MoveOrientation::UpDown ? Qt::SizeVerCursor : Qt::SizeHorCursor);
 }
 
 QRectF ConnectorHandle::boundingRect() const

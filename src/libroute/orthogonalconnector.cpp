@@ -4,25 +4,14 @@
 
 #include "pointgraph.h"
 
-QList<QLineF> OrthogonalConnector::route(const ShapeInfo &startShapeInfo, const ShapeInfo &endShapeInfo)
+QList<QLineF> OrthogonalConnector::routeAutomatic(const ShapeInfo &startShapeInfo, const ShapeInfo &endShapeInfo)
 {
     return OrthogonalConnectorAuto::route(startShapeInfo, endShapeInfo);
 }
 
-QList<QLineF> OrthogonalConnector::route(const ShapeInfo &startShapeInfo,
-                                         const ShapeInfo &endShapeInfo,
-                                         const QList<Waypoint> &waypoints)
+QList<QLineF> OrthogonalConnector::routeOnlyByWaypoints(const ShapeInfo &startShapeInfo,
+                                                        const ShapeInfo &endShapeInfo,
+                                                        const QList<Waypoint> &waypoints)
 {
     return OrthogonalConnectorManual::route(startShapeInfo, endShapeInfo, waypoints);
-}
-
-PointGraph OrthogonalConnector::routePointGraph(const ShapeInfo &startShapeInfo,
-                                                const ShapeInfo &endShapeInfo,
-                                                const QList<Waypoint> &waypoints)
-{
-    if (waypoints.empty()) {
-        return OrthogonalConnectorAuto::routePointGraph(startShapeInfo, endShapeInfo);
-    } else {
-        return OrthogonalConnectorManual::routePointGraph(startShapeInfo, endShapeInfo, waypoints);
-    }
 }

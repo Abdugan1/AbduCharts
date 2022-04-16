@@ -47,6 +47,12 @@ private:
 
     ConnectorHandle *createConnectorHandle(const QLineF& line, int lineIndex);
 
+    bool firstHandleMoved(const ConnectorHandle* handle) const;
+    bool lastHandleMoved(const ConnectorHandle* handle) const;
+
+    void addNewLineToConnectionPathBegin();
+    void addNewLineToConnectionPathEnd();
+
 private:
     QPainterPath linesToPath() const;
     QPolygonF calculateArrow() const;

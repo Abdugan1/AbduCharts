@@ -81,14 +81,14 @@ void ConnectorItem::updateConnectionPath()
     const int previousConnectionPathLineCount = connectionPath_.count();
 
     if (autoPathFinding_) {
-        connectionPath_ = OrthogonalConnector::route(startShapeInfo_, endShapeInfo_);
+        connectionPath_ = OrthogonalConnector::routeAutomatic(startShapeInfo_, endShapeInfo_);
 
     } else {
         QList<Waypoint> waypoints;
         for (const auto handle : qAsConst(connectorHandles_))
             waypoints.append(Waypoint(handle->pos(), handle->moveOrientation()));
 
-        connectionPath_ = OrthogonalConnector::route(startShapeInfo_, endShapeInfo_, waypoints);
+        connectionPath_ = OrthogonalConnector::routeOnlyByWaypoints(startShapeInfo_, endShapeInfo_, waypoints);
     }
 
     if (previousConnectionPathLineCount == connectionPath_.count()) {
@@ -109,41 +109,13 @@ void ConnectorItem::onConnectorHandleMoved(ConnectorHandle *handle, const QPoint
 
     updateConnectionPathBuMovedHandle(handle, pos);
 
-    if ((handle->lineIndex() + 1 == 1) || (handle->lineIndex() + 1 == connectionPath_.count())) {
-        ConnectorHandle* connectorHandle;
-        if (handle->lineIndex() + 1 == 1) {
-            QRectF itemRect = startItem()->boundingRect();
-            itemRect.moveTopLeft(itemRect.topLeft() + startItem()->pos());
+    if (firstHandleMoved(handle)) {
+        addNewLineToConnectionPathBegin();
 
-            QPointF p1(getConnectionPoint(itemRect, startShapeInfo_.connectionSide()));
-            QPointF p2(connectionPath_.first().p1());
-            connectionPath_.prepend({p1, p2});
-
-            connectorHandle = createConnectorHandle(connectionPath_.first(), 0);
-            connectorHandles_.prepend(connectorHandle);
-
-            int i = 1;
-            for (auto it = connectorHandles_.begin() + 1; it != connectorHandles_.end(); ++it) {
-                (*it)->setLineIndex(i++);
-            }
-
-        } else if (handle->lineIndex() + 1 == connectionPath_.count()) {
-            QRectF itemRect = endItem()->boundingRect();
-            itemRect.moveTopLeft(itemRect.topLeft() + endItem()->pos());
-
-            QPointF p1(connectionPath_.last().p2());
-            QPointF p2(getConnectionPoint(itemRect, endShapeInfo_.connectionSide()));
-            connectionPath_.append({p1, p2});
-
-            connectorHandle = createConnectorHandle(connectionPath_.last(), connectionPath_.count() - 1);
-            connectorHandles_.append(connectorHandle);
-
-            int i = 0;
-            for (auto it = connectorHandles_.begin(); it != (connectorHandles_.end() - 1); ++it) {
-                (*it)->setLineIndex(i++);
-            }
-        }
+    } else if (lastHandleMoved(handle)) {
+        addNewLineToConnectionPathEnd();
     }
+
     updateConnectorHandlesPosition();
 }
 
@@ -179,6 +151,7 @@ void ConnectorItem::updateConnectionPathBuMovedHandle(const ConnectorHandle *han
 {
     int currentLineIndex = handle->lineIndex();
     QLineF currentLine = connectionPath_.at(currentLineIndex);
+
     if (handle->moveOrientation() == MoveOrientation::UpDown) {
         currentLine.setP1({currentLine.p1().x(), movedPos.y()});
         currentLine.setP2({currentLine.p2().x(), movedPos.y()});
@@ -188,13 +161,13 @@ void ConnectorItem::updateConnectionPathBuMovedHandle(const ConnectorHandle *han
     }
     connectionPath_.replace(currentLineIndex, currentLine);
 
-    if (currentLineIndex > 0) {
+    if (!firstHandleMoved(handle)) {
         QLineF beforeLine = connectionPath_.at(currentLineIndex - 1);
         beforeLine.setP2(currentLine.p1());
         connectionPath_.replace(currentLineIndex - 1, beforeLine);
     }
 
-    if (currentLineIndex < connectionPath_.count() - 1) {
+    if (!lastHandleMoved(handle)) {
         QLineF afterLine = connectionPath_.at(currentLineIndex + 1);
         afterLine.setP1(currentLine.p2());
         connectionPath_.replace(currentLineIndex + 1, afterLine);
@@ -208,6 +181,52 @@ ConnectorHandle *ConnectorItem::createConnectorHandle(const QLineF &line, int li
             this,            &ConnectorItem::onConnectorHandleMoved);
     return connectorHandle;
 
+}
+
+bool ConnectorItem::firstHandleMoved(const ConnectorHandle *handle) const
+{
+    return (handle->lineIndex() == 0);
+}
+
+bool ConnectorItem::lastHandleMoved(const ConnectorHandle *handle) const
+{
+    return (handle->lineIndex() == connectionPath_.count() - 1);
+}
+
+void ConnectorItem::addNewLineToConnectionPathBegin()
+{
+    QRectF itemRect = startItem()->boundingRect();
+    itemRect.moveTopLeft(itemRect.topLeft() + startItem()->pos());
+
+    QPointF p1(getConnectionPoint(itemRect, startShapeInfo_.connectionSide()));
+    QPointF p2(connectionPath_.first().p1());
+    connectionPath_.prepend({p1, p2});
+
+    connectorHandles_.prepend(createConnectorHandle(connectionPath_.first(), 0));
+
+    // change line indexes of all connector handles except added one
+    int i = 1;
+    for (auto it = connectorHandles_.begin() + 1; it != connectorHandles_.end(); ++it) {
+        (*it)->setLineIndex(i++);
+    }
+}
+
+void ConnectorItem::addNewLineToConnectionPathEnd()
+{
+    QRectF itemRect = endItem()->boundingRect();
+    itemRect.moveTopLeft(itemRect.topLeft() + endItem()->pos());
+
+    QPointF p1(connectionPath_.last().p2());
+    QPointF p2(getConnectionPoint(itemRect, endShapeInfo_.connectionSide()));
+    connectionPath_.append({p1, p2});
+
+    connectorHandles_.append(createConnectorHandle(connectionPath_.last(), connectionPath_.count() - 1));
+
+    // change line indexes of all connector handles except added one
+    int i = 0;
+    for (auto it = connectorHandles_.begin(); it != (connectorHandles_.end() - 1); ++it) {
+        (*it)->setLineIndex(i++);
+    }
 }
 
 QPainterPath ConnectorItem::linesToPath() const

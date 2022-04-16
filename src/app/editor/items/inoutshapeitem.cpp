@@ -15,7 +15,7 @@ InOutShapeItem::InOutShapeItem(QGraphicsItem *parent)
     initByShape(shape);
 }
 
-QString InOutShapeItem::figureType() const
+int InOutShapeItem::type() const
 {
-    return "Input/Output";
+    return Type;
 }

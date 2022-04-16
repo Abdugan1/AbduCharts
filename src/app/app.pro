@@ -24,14 +24,19 @@ SOURCES += \
     editor/itemresizer.cpp \
     editor/items/decisionshapeitem.cpp \
     editor/items/flowchartshapeitem.cpp \
+    editor/items/flowchartshapestextitem.cpp \
+    editor/items/flowcharttextitem.cpp \
     editor/items/inoutshapeitem.cpp \
     editor/items/processshapeitem.cpp \
     editor/items/shapeitembase.cpp \
     editor/items/shapeitemcreator.cpp \
     editor/items/terminalshapeitem.cpp \
+    editor/items/textitem.cpp \
     editor/resizehandle.cpp \
     editor/scene.cpp \
-    editor/textitems.cpp \
+    editor/undo_commands/addcommand.cpp \
+    editor/undo_commands/deletecommand.cpp \
+    editor/undo_commands/movecommand.cpp \
     editor/view.cpp \
     main.cpp \
     ui/bottomtoolbar.cpp \
@@ -40,7 +45,6 @@ SOURCES += \
     ui/itemlibrarydockkwidget.cpp \
     ui/mainwindow.cpp \
     ui/shapeitemdrag.cpp \
-    ui/undocommands.cpp \
     ui/uppertoolbar.cpp \
     ui/zoomcombobox.cpp \
     ui/zoomlineedit.cpp \
@@ -58,14 +62,21 @@ HEADERS += \
     editor/items/decisionshapeitem.h \
     editor/items/flowchartshapeitem.h \
     editor/items/flowchartshapeitems.h \
+    editor/items/flowchartshapestextitem.h \
+    editor/items/flowcharttextitem.h \
+    editor/items/flowcharttextitems.h \
     editor/items/inoutshapeitem.h \
     editor/items/processshapeitem.h \
     editor/items/shapeitembase.h \
     editor/items/shapeitemcreator.h \
     editor/items/terminalshapeitem.h \
+    editor/items/textitem.h \
     editor/resizehandle.h \
     editor/scene.h \
-    editor/textitems.h \
+    editor/undo_commands/addcommand.h \
+    editor/undo_commands/deletecommand.h \
+    editor/undo_commands/movecommand.h \
+    editor/undo_commands/undocommands.h \
     editor/view.h \
     ui/bottomtoolbar.h \
     ui/colorpickerbutton.h \
@@ -73,7 +84,6 @@ HEADERS += \
     ui/itemlibrarydockkwidget.h \
     ui/mainwindow.h \
     ui/shapeitemdrag.h \
-    ui/undocommands.h \
     ui/uppertoolbar.h \
     ui/zoomcombobox.h \
     ui/zoomlineedit.h \

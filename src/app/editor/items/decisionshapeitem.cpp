@@ -21,7 +21,7 @@ DecisionShapeItem::DecisionShapeItem(QGraphicsItem *parent)
     initByShape(shape);
 }
 
-QString DecisionShapeItem::figureType() const
+int DecisionShapeItem::type() const
 {
-    return "Decision";
+    return Type;
 }

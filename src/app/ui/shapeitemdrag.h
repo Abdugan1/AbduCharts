@@ -8,13 +8,13 @@ class ShapeItemMimeData : public QMimeData
 {
     Q_OBJECT
 public:
-    const QString &figureType() const;
-    void setFigureType(const QString &newFigureType);
-
     static QString mimeType();
 
+    int itemType() const;
+    void setItemType(int itemType);
+
 private:
-    QString figureType_;
+    int itemType_ = -1;
 };
 
 
@@ -29,7 +29,7 @@ class ShapeItemDrag : public QDrag
 public:
     explicit ShapeItemDrag(QObject *dragSource);
 
-    void setFigureType(const QString& figureType);
+    void setItemType(int itemType);
 };
 
 #endif // SHAPEITEMDRAG_H

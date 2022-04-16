@@ -8,7 +8,7 @@ class FlowchartShapeItem;
 class ItemButton : public QToolButton
 {
 public:
-    explicit ItemButton(const FlowchartShapeItem& shapeItem, QWidget* parent = nullptr);
+    explicit ItemButton(int itemType, QWidget* parent = nullptr);
 
 protected:
     void mousePressEvent(QMouseEvent* event) override;
@@ -16,6 +16,7 @@ protected:
 
 private:
     QString figureType_;
+    int itemType_ = -1;
 
     QPoint dragStartPosition_;
 };

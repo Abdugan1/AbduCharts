@@ -10,7 +10,7 @@ TerminalShapeItem::TerminalShapeItem(QGraphicsItem *parent)
     initByShape(shape);
 }
 
-QString TerminalShapeItem::figureType() const
+int TerminalShapeItem::type() const
 {
-    return "Terminal";
+    return Type;
 }

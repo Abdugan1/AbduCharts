@@ -13,10 +13,10 @@ ItemLibraryDockWidget::ItemLibraryDockWidget(QWidget *parent)
     setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     setWindowTitle("Flowchart Shapes");
 
-    gridLayout_->addWidget(new ItemButton(TerminalShapeItem()),  0, 0);
-    gridLayout_->addWidget(new ItemButton(ProcessShapeItem()),   0, 1);
-    gridLayout_->addWidget(new ItemButton(DecisionShapeItem()),  0, 2);
-    gridLayout_->addWidget(new ItemButton(InOutShapeItem()),     0, 3);
+    gridLayout_->addWidget(new ItemButton(TerminalShapeItem::Type),  0, 0);
+    gridLayout_->addWidget(new ItemButton(ProcessShapeItem::Type),   0, 1);
+    gridLayout_->addWidget(new ItemButton(DecisionShapeItem::Type),  0, 2);
+    gridLayout_->addWidget(new ItemButton(InOutShapeItem::Type),     0, 3);
 
     QVBoxLayout* vLayout = new QVBoxLayout;
     vLayout->addLayout(gridLayout_);

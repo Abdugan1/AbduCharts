@@ -19,16 +19,20 @@ class FlowchartShapeItem : public QObject, public ShapeItemBase
 {
     Q_OBJECT
 public:
+    enum { Type = UserType + 2 };
+
     enum DefaultSize {
         Width  = 200,
         Height = 80
     };
 
     explicit FlowchartShapeItem(QGraphicsItem* parent = nullptr);
-    ~FlowchartShapeItem();
+    virtual ~FlowchartShapeItem() = 0;
 
     QRectF boundingRect() const override;
     QRectF contentRect()  const override;
+
+    int type() const override;
 
     QPainterPath shape() const override;
     void setShape(const QPainterPath& shape);
@@ -36,8 +40,6 @@ public:
     void paint(QPainter *painter,
                const QStyleOptionGraphicsItem *option,
                QWidget *widget) override;
-
-    virtual QString figureType() const = 0;
 
     void setText(const QString& text);
 

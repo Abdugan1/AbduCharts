@@ -10,7 +10,7 @@ ProcessShapeItem::ProcessShapeItem(QGraphicsItem *parent)
     initByShape(shape);
 }
 
-QString ProcessShapeItem::figureType() const
+int ProcessShapeItem::type() const
 {
-    return "Process";
+    return Type;
 }

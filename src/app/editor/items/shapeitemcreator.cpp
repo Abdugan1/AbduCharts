@@ -1,13 +1,14 @@
 #include "shapeitemcreator.h"
 #include "editor/items/flowchartshapeitems.h"
 
-FlowchartShapeItem* ShapeItemCreator::createShape(const QString &shapeType)
+FlowchartShapeItem *ShapeItemCreator::createShape(int itemType)
 {
-    if      (shapeType == "Terminal")      return (new TerminalShapeItem);
-    else if (shapeType == "Process")       return (new ProcessShapeItem);
-    else if (shapeType == "Decision")      return (new DecisionShapeItem);
-    else if (shapeType == "Input/Output")  return (new InOutShapeItem);
+    switch (itemType) {
+    case TerminalShapeItem::Type:   return (new TerminalShapeItem);
+    case ProcessShapeItem::Type:    return (new ProcessShapeItem);
+    case DecisionShapeItem::Type:   return (new DecisionShapeItem);
+    case InOutShapeItem::Type:      return (new InOutShapeItem);
+    }
 
     Q_UNREACHABLE();
-    return nullptr;
 }

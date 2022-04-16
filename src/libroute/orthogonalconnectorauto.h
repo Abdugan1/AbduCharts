@@ -21,9 +21,6 @@ public:
     static QList<QLineF> route(const ShapeInfo& startShapeInfo,
                                const ShapeInfo& endShapeInfo);
 
-    static PointGraph routePointGraph(const ShapeInfo& startShapeInfo,
-                                      const ShapeInfo& endShapeInfo);
-
 private:
     static QList<double> getVerticalRulersFromItems(const QRectF& startItemBoundingRect,
                                                     const QRectF& endItemBoundingRect);

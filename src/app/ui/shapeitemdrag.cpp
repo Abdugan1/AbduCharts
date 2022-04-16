@@ -1,19 +1,19 @@
 #include "ui/shapeitemdrag.h"
 
-const QString &ShapeItemMimeData::figureType() const
-{
-    return figureType_;
-}
-
-void ShapeItemMimeData::setFigureType(const QString &newFigureType)
-{
-    figureType_ = newFigureType;
-    setData(mimeType(), QByteArray());
-}
-
 QString ShapeItemMimeData::mimeType()
 {
     return "application/shape-item";
+}
+
+int ShapeItemMimeData::itemType() const
+{
+    return itemType_;
+}
+
+void ShapeItemMimeData::setItemType(int itemType)
+{
+    itemType_ = itemType;
+    setData(mimeType(), QByteArray());
 }
 
 
@@ -28,9 +28,9 @@ ShapeItemDrag::ShapeItemDrag(QObject *dragSource)
 
 }
 
-void ShapeItemDrag::setFigureType(const QString &figureType)
+void ShapeItemDrag::setItemType(int itemType)
 {
     ShapeItemMimeData* mimeData = new ShapeItemMimeData;
-    mimeData->setFigureType(figureType);
+    mimeData->setItemType(itemType);
     setMimeData(mimeData);
 }

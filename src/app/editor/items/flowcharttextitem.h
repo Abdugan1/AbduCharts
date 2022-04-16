@@ -1,5 +1,6 @@
-#ifndef TEXTITEMS_H
-#define TEXTITEMS_H
+#ifndef FLOWCHARTTEXTITEM_H
+#define FLOWCHARTTEXTITEM_H
+
 
 #include <QGraphicsTextItem>
 #include <QTextCharFormat>
@@ -8,8 +9,12 @@ class FlowchartTextItem : public QGraphicsTextItem
 {
     Q_OBJECT
 public:
+    enum {Type = UserType + 1000};
+
     explicit FlowchartTextItem(QGraphicsItem* parent = nullptr);
     ~FlowchartTextItem();
+
+    int type() const override;
 
     void mergeCharFormat(const QTextCharFormat& format);
     void setBlockFormat(const QTextBlockFormat& format);
@@ -58,46 +63,4 @@ private:
     static QTextBlockFormat defaultBlockFormat_;
 };
 
-
-class FlowchartShapeItem;
-
-class FlowchartShapesTextItem : public FlowchartTextItem
-{
-    Q_OBJECT
-public:
-    explicit FlowchartShapesTextItem(FlowchartShapeItem* parent = nullptr);
-    ~FlowchartShapesTextItem();
-
-    void paint(QPainter *painter,
-               const QStyleOptionGraphicsItem *option,
-               QWidget *widget) override;
-
-public slots:
-    void enableTextEditingAndMousePress();
-    void disableTextEditingAndMousePress();
-
-protected:
-    void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-
-private slots:
-    void centerOnShapeItem();
-
-private:
-    FlowchartShapeItem* myItem_ = nullptr;
-    bool acceptMousePress_ = false;
-};
-
-
-class TextItem : public FlowchartTextItem
-{
-    Q_OBJECT
-public:
-    explicit TextItem(QGraphicsItem* parent = nullptr);
-
-protected:
-    QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
-
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
-};
-
-#endif // TEXTITEMS_H
+#endif // FLOWCHARTTEXTITEM_H

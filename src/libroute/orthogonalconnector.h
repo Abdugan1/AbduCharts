@@ -11,17 +11,12 @@ class PointGraph;
 class OrthogonalConnector
 {
 public:
-    static QList<QLineF> route(const ShapeInfo& startShapeInfo,
-                               const ShapeInfo& endShapeInfo);
+    static QList<QLineF> routeAutomatic(const ShapeInfo& startShapeInfo,
+                                        const ShapeInfo& endShapeInfo);
 
-    static QList<QLineF> route(const ShapeInfo& startShapeInfo,
-                               const ShapeInfo& endShapeInfo,
-                               const QList<Waypoint>& waypoints);
-
-
-    static PointGraph routePointGraph(const ShapeInfo& startShapeInfo,
-                                      const ShapeInfo& endShapeInfo,
-                                      const QList<Waypoint>& waypoints = QList<Waypoint>());
+    static QList<QLineF> routeOnlyByWaypoints(const ShapeInfo& startShapeInfo,
+                                              const ShapeInfo& endShapeInfo,
+                                              const QList<Waypoint>& waypoints);
 };
 
 #endif // ORTHOGONALCONNECTOR_H

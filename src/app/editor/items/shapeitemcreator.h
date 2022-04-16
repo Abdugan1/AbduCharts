@@ -7,7 +7,7 @@ class QString;
 class ShapeItemCreator
 {
 public:
-    static FlowchartShapeItem* createShape(const QString& shapeType);
+    static FlowchartShapeItem* createShape(int itemType);
 };
 
 #endif // SHAPEITEMCREATOR_H

@@ -7,9 +7,11 @@ class ProcessShapeItem : public FlowchartShapeItem
 {
     Q_OBJECT
 public:
+    enum { Type = UserType + 13 };
+
     explicit ProcessShapeItem(QGraphicsItem* parent = nullptr);
 
-    QString figureType() const override;
+    int type() const override;
 };
 
 #endif // PROCESSSHAPEITEM_H

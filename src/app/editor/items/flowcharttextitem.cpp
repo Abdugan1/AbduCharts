@@ -1,4 +1,4 @@
-#include "editor/textitems.h"
+#include "flowcharttextitem.h"
 #include "editor/items/flowchartshapeitem.h"
 #include "editor/grid.h"
 
@@ -28,6 +28,11 @@ FlowchartTextItem::FlowchartTextItem(QGraphicsItem *parent)
 FlowchartTextItem::~FlowchartTextItem()
 {
     qDebug() << "FlowchartTextItem: Destructor";
+}
+
+int FlowchartTextItem::type() const
+{
+    return Type;
 }
 
 void FlowchartTextItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
@@ -188,91 +193,4 @@ void FlowchartTextItem::disableTextEditing()
     setCursor(Qt::ArrowCursor);
 
     emit disabled(this);
-}
-
-
-//----------------------------------------------------------------
-//                  FlowchartShapesTextItem
-//----------------------------------------------------------------
-
-
-FlowchartShapesTextItem::FlowchartShapesTextItem(FlowchartShapeItem *parent)
-    : FlowchartTextItem(parent)
-    , myItem_(parent)
-{
-    connect(parent, &FlowchartShapeItem::resizedByHands, this, &FlowchartShapesTextItem::centerOnShapeItem);
-    connect(document(), &QTextDocument::contentsChanged, this, &FlowchartShapesTextItem::centerOnShapeItem);
-
-    centerOnShapeItem();
-}
-
-FlowchartShapesTextItem::~FlowchartShapesTextItem()
-{
-    qDebug() << "FlowchartShapesTextItem: Destructor";
-}
-
-void FlowchartShapesTextItem::paint(QPainter *painter,
-                           const QStyleOptionGraphicsItem *option,
-                           QWidget *widget)
-{
-    FlowchartTextItem::paint(painter, option, widget);
-}
-
-void FlowchartShapesTextItem::enableTextEditingAndMousePress()
-{
-    acceptMousePress_ = true;
-    enableTextEditing();
-}
-
-void FlowchartShapesTextItem::disableTextEditingAndMousePress()
-{
-    acceptMousePress_ = false;
-    disableTextEditing();
-}
-
-void FlowchartShapesTextItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
-{
-    qDebug() << "FlowchartShapesTextItem: mousePress";
-    if (!acceptMousePress_) {
-        event->ignore();
-    } else {
-        FlowchartTextItem::mousePressEvent(event);
-    }
-}
-
-void FlowchartShapesTextItem::centerOnShapeItem()
-{
-    setPos(-boundingRect().width() / 2, -boundingRect().height() / 2);
-}
-
-
-//----------------------------------------------------------------
-//                  TextItem
-//----------------------------------------------------------------
-
-
-TextItem::TextItem(QGraphicsItem *parent)
-    : FlowchartTextItem(parent)
-{
-    setPlainText("Im a TextItem!!!");
-    setFlags(ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges);
-}
-
-QVariant TextItem::itemChange(GraphicsItemChange change, const QVariant &value)
-{
-    if (change == ItemPositionChange && Grid::enabled()) {
-        return Grid::snapToGrid(value.toPointF());
-    }
-    if (change == ItemSelectedHasChanged && !value.toBool()) {
-        qDebug() << "lost selection";
-        disableTextEditing();
-    }
-    return FlowchartTextItem::itemChange(change, value);
-}
-
-void TextItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
-{
-    FlowchartTextItem::mouseDoubleClickEvent(event);
-    if (textInteractionFlags() == Qt::NoTextInteraction)
-        enableTextEditing();
 }
