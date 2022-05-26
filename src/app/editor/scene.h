@@ -20,10 +20,13 @@ public:
     explicit Scene(const QRectF& sceneRect, QObject* parent = nullptr);
     ~Scene();
 
-    void addItem(FlowchartShapeItem* item);
-    void addItem(FlowchartTextItem* item);
-    void removeItem(FlowchartShapeItem* item);
-    void removeItem(FlowchartTextItem* item);
+    void addShapeItem(FlowchartShapeItem* item);
+    void addTextItem(FlowchartTextItem* item);
+    void addConnectorItem(ConnectorItem* item);
+
+    void removeShapeItem(FlowchartShapeItem* item);
+    void removeTextItem(FlowchartTextItem* item);
+    void removeConnectorItem(ConnectorItem* item);
 
 signals:
     void itemSelected(FlowchartShapeItem* item);

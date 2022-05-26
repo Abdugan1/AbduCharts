@@ -120,7 +120,7 @@ void View::mouseDoubleClickEvent(QMouseEvent *event)
 
 void View::dragEnterEvent(QDragEnterEvent *event)
 {
-    qDebug() << "mime type:" << ShapeItemMimeData::mimeType();
+    qDebug() << "View::dragEnterEvent: mime type:" << ShapeItemMimeData::mimeType();
     if (event->mimeData()->hasFormat(ShapeItemMimeData::mimeType()))
         event->acceptProposedAction();
 }
@@ -177,18 +177,15 @@ void View::zoom(qreal zoomRatio)
 
 void View::deleteSelectedItem()
 {
-    qDebug() << "View::deleteSelectedItem";
     auto selectedItems = scene_->selectedItems();
     QGraphicsItem* selectedItem = (selectedItems.empty() ? nullptr : selectedItems.first());
-    if (selectedItem) {
-        qDebug() << "Has selected item";
-        DeleteCommand* deleteCommand = nullptr;
-        if (auto shapeItem = dynamic_cast<FlowchartShapeItem*>(selectedItem)) {
-            qDebug() << "deleteSelectedItem: Deleting shape item";
-            deleteCommand = DeleteCommand::fromShapeItem(shapeItem, scene_);
 
+    if (selectedItem) {
+        DeleteCommand* deleteCommand = nullptr;
+
+        if (auto shapeItem = dynamic_cast<FlowchartShapeItem*>(selectedItem)) {
+            deleteCommand = DeleteCommand::fromShapeItem(shapeItem, scene_);
         } else if (auto textItem = dynamic_cast<FlowchartTextItem*>(selectedItem)) {
-            qDebug() << "deleteSelectedItem: Deleting text item";
             deleteCommand = DeleteCommand::fromTextItem(textItem, scene_);
         }
 

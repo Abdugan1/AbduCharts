@@ -1,45 +1,35 @@
 #include "deletecommand.h"
-#include "editor/items/flowchartshapeitem.h"
-#include "editor/items/flowcharttextitem.h"
-#include "editor/scene.h"
-
+#include "deleteshapecommand.h"
+#include "deletetextcommand.h"
+#include "deleteconnectorcommand.h"
 
 DeleteCommand *DeleteCommand::fromShapeItem(FlowchartShapeItem *shapeItem, Scene *scene)
 {
-    DeleteCommand* deleteCommand = new DeleteCommand;
-    deleteCommand->shapeItem_ = shapeItem;
-    deleteCommand->scene_ = scene;
-
-    shapeItem->setSelected(false);
-
-    return deleteCommand;
+    return new DeleteShapeCommand(shapeItem, scene);
 }
 
 DeleteCommand *DeleteCommand::fromTextItem(FlowchartTextItem *textItem, Scene *scene)
 {
-    DeleteCommand* deleteCommand = new DeleteCommand;
-    deleteCommand->textItem_ = textItem;
-    deleteCommand->scene_ = scene;
-
-    textItem->setSelected(false);
-
-    return deleteCommand;
+    return new DeleteTextCommand(textItem, scene);
 }
 
-void DeleteCommand::undo()
+DeleteCommand *DeleteCommand::fromConnectorItem(ConnectorItem *connectorItem, Scene *scene)
 {
-    if (shapeItem_) {
-        scene_->addItem(shapeItem_);
-    } else {
-        scene_->addItem(textItem_);
-    }
+    return new DeleteConnectorCommand(connectorItem, scene);
 }
 
-void DeleteCommand::redo()
+DeleteCommand::DeleteCommand(QUndoCommand *parent)
+    : QUndoCommand(parent)
 {
-    if (shapeItem_) {
-        scene_->removeItem(shapeItem_);
-    } else {
-        scene_->removeItem(textItem_);
-    }
+
+}
+
+Scene *DeleteCommand::scene() const
+{
+    return scene_;
+}
+
+void DeleteCommand::setScene(Scene *newScene)
+{
+    scene_ = newScene;
 }

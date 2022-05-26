@@ -4,28 +4,27 @@
 #include <QUndoCommand>
 #include <QPointF>
 
-class FlowchartShapeItem;
-class FlowchartTextItem;
 class Scene;
+class ConnectorItem;
 
 class AddCommand : public QUndoCommand
 {
 public:
     static AddCommand* fromShapeItem(int itemType, const QPointF& pos, Scene* scene);
     static AddCommand* fromTextItem(const QString& text, const QPointF& pos, Scene* scene);
+    static AddCommand* fromConnectorItem(ConnectorItem* connectorItem, Scene* scene);
 
-    void undo() override;
-    void redo() override;
+protected:
+    QPointF initialPos() const;
+    void setInitialPos(QPointF newInitialPos);
+
+    Scene *scene() const;
+    void setScene(Scene *newScene);
+
+    explicit AddCommand(QUndoCommand* parent = nullptr);
 
 private:
-    AddCommand() {};
-
-private:
-    FlowchartShapeItem* shapeItem_ = nullptr;
-    FlowchartTextItem*  textItem_  = nullptr;
-
-    QPointF initialPosition_;
-
+    QPointF initialPos_;
     Scene* scene_ = nullptr;
 };
 

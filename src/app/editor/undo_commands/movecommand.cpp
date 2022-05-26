@@ -12,7 +12,7 @@ MoveCommand::MoveCommand(QGraphicsItem* shapeItem, const QPointF& oldPos)
 
 void MoveCommand::undo()
 {
-    qDebug() << "Move: undo";
+    qDebug() << "MoveCommand: undo";
     item_->setFlag(QGraphicsItem::ItemSendsGeometryChanges, false);
     item_->setPos(oldPos_);
     item_->setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
@@ -20,7 +20,7 @@ void MoveCommand::undo()
 
 void MoveCommand::redo()
 {
-    qDebug() << "Move: redo";
+    qDebug() << "MoveCommand: redo";
     item_->setFlag(QGraphicsItem::ItemSendsGeometryChanges, false);
     item_->setPos(newPos_);
     item_->setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);

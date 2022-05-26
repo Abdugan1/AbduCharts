@@ -21,7 +21,7 @@ Scene::~Scene()
     qDebug() << "Scene: Destructor";
 }
 
-void Scene::addItem(FlowchartShapeItem *item)
+void Scene::addShapeItem(FlowchartShapeItem *item)
 {
     QGraphicsScene::addItem(item);
     flowchartShapeItems_.append(item);
@@ -30,7 +30,7 @@ void Scene::addItem(FlowchartShapeItem *item)
     connectSignalsOfTextItem(item->textItem());
 }
 
-void Scene::addItem(FlowchartTextItem *item)
+void Scene::addTextItem(FlowchartTextItem *item)
 {
     QGraphicsScene::addItem(item);
     textItems_.append(item);
@@ -38,22 +38,32 @@ void Scene::addItem(FlowchartTextItem *item)
     connectSignalsOfTextItem(item);
 }
 
-void Scene::removeItem(FlowchartShapeItem *item)
+void Scene::addConnectorItem(ConnectorItem *item)
+{
+    QGraphicsScene::addItem(item);
+}
+
+void Scene::removeShapeItem(FlowchartShapeItem *item)
 {
     QGraphicsScene::removeItem(item);
     flowchartShapeItems_.removeAll(item);
 }
 
-void Scene::removeItem(FlowchartTextItem *item)
+void Scene::removeTextItem(FlowchartTextItem *item)
 {
     QGraphicsScene::removeItem(item);
     textItems_.removeAll(item);
 }
 
+void Scene::removeConnectorItem(ConnectorItem *item)
+{
+    QGraphicsScene::removeItem(item);
+}
+
 void Scene::applyCharFormatOnCurrentTextItem(const QTextCharFormat &format)
 {
     QGraphicsItem* focusItem = this->focusItem();
-    if (auto textItem = qgraphicsitem_cast<FlowchartTextItem*>(focusItem)) {
+    if (auto textItem = dynamic_cast<FlowchartTextItem*>(focusItem)) {
         textItem->mergeCharFormat(format);
     }
 }
@@ -61,7 +71,7 @@ void Scene::applyCharFormatOnCurrentTextItem(const QTextCharFormat &format)
 void Scene::applyBlockFormatOnCurrentTextItem(const QTextBlockFormat &format)
 {
     QGraphicsItem* focusItem = this->focusItem();
-    if (auto textItem = qgraphicsitem_cast<FlowchartTextItem*>(focusItem)) {
+    if (auto textItem = dynamic_cast<FlowchartTextItem*>(focusItem)) {
         textItem->setBlockFormat(format);
     }
 }
@@ -139,17 +149,17 @@ void Scene::addGuideLine(GuideLine *positionLine)
 
 void Scene::connectSignalsOfShapeItem(FlowchartShapeItem *item)
 {
-    qDebug() << connect(item, &FlowchartShapeItem::moved,                  this, &Scene::onItemMoved);
-    qDebug() << connect(item, &FlowchartShapeItem::resizedByHands,         this, &Scene::onItemResizedByHands);
-    qDebug() << connect(item, &FlowchartShapeItem::selected,               this, &Scene::bringToFront);
-    qDebug() << connect(item, &FlowchartShapeItem::pressed,                this, &Scene::saveClickedItemInfo);
-    qDebug() << connect(item, &FlowchartShapeItem::released,               this, &Scene::deleteAllGuidelines);
-    qDebug() << connect(item, &FlowchartShapeItem::released,               this, &Scene::onItemReleased);
-    qDebug() << connect(item, &FlowchartShapeItem::selected,               this, &Scene::itemSelected);
-    qDebug() << connect(item, &FlowchartShapeItem::moved,                  this, &Scene::itemMoved);
-    qDebug() << connect(item, &FlowchartShapeItem::lostSelection,          this, &Scene::itemLostSelection);
-    qDebug() << connect(item, &FlowchartShapeItem::resizeHandleReleased,   this, &Scene::deleteAllGuidelines);
-    qDebug() << connect(item, &FlowchartShapeItem::connectorPointPressed, this, &Scene::doConnectorItem);
+    connect(item, &FlowchartShapeItem::moved,                  this, &Scene::onItemMoved);
+    connect(item, &FlowchartShapeItem::resizedByHands,         this, &Scene::onItemResizedByHands);
+    connect(item, &FlowchartShapeItem::selected,               this, &Scene::bringToFront);
+    connect(item, &FlowchartShapeItem::pressed,                this, &Scene::saveClickedItemInfo);
+    connect(item, &FlowchartShapeItem::released,               this, &Scene::deleteAllGuidelines);
+    connect(item, &FlowchartShapeItem::released,               this, &Scene::onItemReleased);
+    connect(item, &FlowchartShapeItem::selected,               this, &Scene::itemSelected);
+    connect(item, &FlowchartShapeItem::moved,                  this, &Scene::itemMoved);
+    connect(item, &FlowchartShapeItem::lostSelection,          this, &Scene::itemLostSelection);
+    connect(item, &FlowchartShapeItem::resizeHandleReleased,   this, &Scene::deleteAllGuidelines);
+    connect(item, &FlowchartShapeItem::connectorPointPressed, this, &Scene::doConnectorItem);
 }
 
 void Scene::connectSignalsOfTextItem(FlowchartTextItem *textItem)

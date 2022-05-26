@@ -1,54 +1,47 @@
 #include "addcommand.h"
-#include "editor/items/flowchartshapeitem.h"
-#include "editor/items/shapeitemcreator.h"
-#include "editor/items/textitem.h"
-#include "editor/scene.h"
+#include "addshapecommand.h"
+#include "addtextcommand.h"
+#include "addconnectorcommand.h"
 
 #include <QDebug>
 
 AddCommand *AddCommand::fromShapeItem(int itemType, const QPointF &pos, Scene *scene)
 {
-    AddCommand* addCommand = new AddCommand;
-    addCommand->shapeItem_ = ShapeItemCreator::createShape(itemType);
-    addCommand->initialPosition_ = pos;
-    addCommand->scene_ = scene;
-
-    addCommand->shapeItem_->setSelected(true);
-
-    return addCommand;
+    return new AddShapeCommand(itemType, pos, scene);
 }
 
 AddCommand *AddCommand::fromTextItem(const QString &text, const QPointF &pos, Scene *scene)
 {
-    AddCommand* addCommand = new AddCommand;
-    addCommand->textItem_ = new TextItem;
-    addCommand->textItem_->setPlainText(text);
-    addCommand->initialPosition_ = pos  - addCommand->textItem_->boundingRect().center();
-    addCommand->scene_ = scene;
-
-    addCommand->textItem_->enableTextEditing();
-
-    return addCommand;
+    return new AddTextCommand(text, pos, scene);
 }
 
-void AddCommand::undo()
+AddCommand *AddCommand::fromConnectorItem(ConnectorItem *connectorItem, Scene *scene)
 {
-    qDebug() << "add undo";
-    if (shapeItem_) {
-        scene_->removeItem(shapeItem_);
-    } else {
-        scene_->removeItem(textItem_);
-    }
+    return new AddConnectorCommand(connectorItem, scene);
 }
 
-void AddCommand::redo()
+AddCommand::AddCommand(QUndoCommand *parent)
+    : QUndoCommand(parent)
 {
-    qDebug() << "add redo";
-    if (shapeItem_) {
-        scene_->addItem(shapeItem_);
-        shapeItem_->setPos(initialPosition_);
-    } else {
-        scene_->addItem(textItem_);
-        textItem_->setPos(initialPosition_);
-    }
+
+}
+
+Scene *AddCommand::scene() const
+{
+    return scene_;
+}
+
+void AddCommand::setScene(Scene *newScene)
+{
+    scene_ = newScene;
+}
+
+QPointF AddCommand::initialPos() const
+{
+    return initialPos_;
+}
+
+void AddCommand::setInitialPos(QPointF newInitialPos)
+{
+    initialPos_ = newInitialPos;
 }

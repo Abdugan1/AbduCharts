@@ -107,10 +107,7 @@ void MainWindow::initActions()
 {
     deleteAction_ = new QAction("&Delete", this);
     deleteAction_->setShortcut(QKeySequence::Delete);
-    connect(deleteAction_, &QAction::triggered, this, [this]() {
-        qDebug() << "Edit->Delete action triggered";
-        emit deleteActionTriggered();
-    });
+    connect(deleteAction_, &QAction::triggered, this, &MainWindow::deleteActionTriggered);
 }
 
 void MainWindow::initMenus()
@@ -126,4 +123,5 @@ void MainWindow::initUi()
 
     addDockWidget(Qt::LeftDockWidgetArea, itemLibraryDockWidget_);
     setCentralWidget(view_);
+    view_->setFocus();
 }

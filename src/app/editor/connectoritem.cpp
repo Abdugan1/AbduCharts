@@ -92,10 +92,10 @@ void ConnectorItem::updateConnectionPath()
     }
 
     if (previousConnectionPathLineCount == connectionPath_.count()) {
-        qDebug() << "Updating position of connector handles";
+        qDebug() << "ConnectorItem: Updating position of connector handles";
         updateConnectorHandlesPosition();
     } else {
-        qDebug() << "Creating new connector handles";
+        qDebug() << "ConnectorItem: Creating new connector handles";
         deleteConnectorHandles();
         generateConnectorHandles();
     }

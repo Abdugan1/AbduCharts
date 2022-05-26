@@ -163,7 +163,7 @@ void FlowchartTextItem::setBlockFormat(const QTextBlockFormat &format)
 
 void FlowchartTextItem::setTextCursor(const QTextCursor &cursor)
 {
-    qDebug() << "custom setTextCursor called";
+    qDebug() << "FlowchartTextItem: Custom setTextCursor called";
     QGraphicsTextItem::setTextCursor(cursor);
     emitCurrentFormattingChangedIfNecessary();
 }

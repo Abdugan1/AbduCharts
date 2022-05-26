@@ -35,7 +35,13 @@ SOURCES += \
     editor/resizehandle.cpp \
     editor/scene.cpp \
     editor/undo_commands/addcommand.cpp \
+    editor/undo_commands/addconnectorcommand.cpp \
+    editor/undo_commands/addshapecommand.cpp \
+    editor/undo_commands/addtextcommand.cpp \
     editor/undo_commands/deletecommand.cpp \
+    editor/undo_commands/deleteconnectorcommand.cpp \
+    editor/undo_commands/deleteshapecommand.cpp \
+    editor/undo_commands/deletetextcommand.cpp \
     editor/undo_commands/movecommand.cpp \
     editor/view.cpp \
     main.cpp \
@@ -74,7 +80,13 @@ HEADERS += \
     editor/resizehandle.h \
     editor/scene.h \
     editor/undo_commands/addcommand.h \
+    editor/undo_commands/addconnectorcommand.h \
+    editor/undo_commands/addshapecommand.h \
+    editor/undo_commands/addtextcommand.h \
     editor/undo_commands/deletecommand.h \
+    editor/undo_commands/deleteconnectorcommand.h \
+    editor/undo_commands/deleteshapecommand.h \
+    editor/undo_commands/deletetextcommand.h \
     editor/undo_commands/movecommand.h \
     editor/undo_commands/undocommands.h \
     editor/view.h \
