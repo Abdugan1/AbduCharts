@@ -43,28 +43,40 @@ public:
 
     void setText(const QString& text);
 
+    void resize(const QRectF& rect);
+
     FlowchartShapesTextItem *textItem() const;
 
     void addConnectorItem(ConnectorItem* connectorItem);
 
+    QRectF contentRectBeforeResize() const;
+
+    QPointF posBeforeResize() const;
+
 signals:
     void moved(FlowchartShapeItem* item);
 
-    void resizedByHands(FlowchartShapeItem* item,
-                        const QRectF& oldRect,
-                        const QRectF& currentRect);
+    void resizedByUser(FlowchartShapeItem* item,
+                       const QRectF& oldRect,
+                       const QRectF& currentRect);
 
     void selected(FlowchartShapeItem* item);
     void lostSelection(FlowchartShapeItem* item);
     void pressed(FlowchartShapeItem* item);
     void released();
 
+    void resizeHandlePressed();
     void resizeHandleReleased();
 
     void connectorPointPressed(ConnectorPoint* point);
 
+public slots:
+    void updateConnectorItems();
+
 private slots:
     void onResizeHandleMoved(ResizeHandle* resizeHandle, qreal dx, qreal dy);
+
+    void saveInfoBeforeResize();
 
 protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
@@ -88,12 +100,14 @@ private:
     QList<ResizeHandle*> resizeHandles_;
     QList<ConnectorPoint*> connectorPoints_;
 
+    QRectF contentRectBeforeResize_;
+    QPointF posBeforeResize_;
     QPainterPath shape_;
     ItemResizer* resizer_ = nullptr;
 
     FlowchartShapesTextItem* textItem_ = nullptr;
 
-   ConnectorItemManager* connectorItemManager_ = nullptr;
+    ConnectorItemManager* connectorItemManager_ = nullptr;
 };
 
 #endif // FLOWCHARTSHAPEITEM_H

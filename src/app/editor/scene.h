@@ -39,6 +39,14 @@ signals:
     void currentBlockFormatChanged(const QTextBlockFormat& format);
     void switchedToAnotherTextItem(FlowchartTextItem* textItem);
 
+    void newConnectorItemAdded(ConnectorItem* connectorItem);
+
+    void resizeCompleted(FlowchartShapeItem* resizedItem,
+                         const QRectF& oldRect,
+                         const QRectF& newRect,
+                         const QPointF& posBeforeResize,
+                         const QPointF& posAfterResize);
+
 public slots:
     void applyCharFormatOnCurrentTextItem(const QTextCharFormat& format);
     void applyBlockFormatOnCurrentTextItem(const QTextBlockFormat& format);
@@ -50,7 +58,7 @@ private slots:
                               const QRectF& oldRect,
                               const QRectF& currentRect);
 
-    void saveClickedItemInfo(QGraphicsItem* item);
+    void savePressedItemInfo(QGraphicsItem* item);
 
     void onItemReleased();
 
@@ -59,6 +67,8 @@ private slots:
     void deleteAllGuidelines();
 
     void doConnectorItem(const ConnectorPoint* handle);
+
+    void emitResizeInfoToViewUndoStack();
 
 private:
     void addGuideLine(GuideLine* positionLine);

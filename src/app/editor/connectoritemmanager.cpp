@@ -1,6 +1,8 @@
 #include "editor/connectoritemmanager.h"
 #include "editor/connectoritem.h"
 
+#include <QDebug>
+
 ConnectorItemManager::ConnectorItemManager(QObject *parent)
     : QObject(parent)
 {
@@ -16,6 +18,7 @@ void ConnectorItemManager::addConnectorItem(ConnectorItem *connectorItem)
 void ConnectorItemManager::updateConnectorItems()
 {
     for (auto connectorItem : qAsConst(connectorItems_)) {
-        connectorItem->updateConnectionPath();
+        if (connectorItem->scene())
+            connectorItem->updateConnectionPath();
     }
 }

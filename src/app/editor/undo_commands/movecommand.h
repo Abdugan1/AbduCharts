@@ -4,19 +4,25 @@
 #include <QUndoCommand>
 #include <QPointF>
 
-class QGraphicsItem;
+class FlowchartShapeItem;
+class FlowchartTextItem;
 
 class MoveCommand : public QUndoCommand
 {
 public:
-    explicit MoveCommand(QGraphicsItem* shapeItem, const QPointF& oldPos);
+    static MoveCommand* fromShapeItem(FlowchartShapeItem* shapeItem, const QPointF& oldPos);
+    static MoveCommand* fromTextItem(FlowchartTextItem* textItem, const QPointF& oldPos);
 
-    void undo() override;
-    void redo() override;
+protected:
+    QPointF oldPos() const;
+    void setOldPos(QPointF newOldPos);
+
+    QPointF newPos() const;
+    void setNewPos(QPointF newNewPos);
+
+    explicit MoveCommand(QUndoCommand* parent = nullptr);
 
 private:
-    QGraphicsItem* item_ = nullptr;
-
     QPointF oldPos_;
     QPointF newPos_;
 };

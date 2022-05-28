@@ -93,7 +93,7 @@ void Scene::onItemResizedByHands(const FlowchartShapeItem *resizedItem,
     addSizeLines(resizedItem, oldRect, currentRect);
 }
 
-void Scene::saveClickedItemInfo(QGraphicsItem *item)
+void Scene::savePressedItemInfo(QGraphicsItem *item)
 {
     clickedItem_ = item;
     clickedItemOldPos_ = item->pos();
@@ -135,10 +135,20 @@ void Scene::doConnectorItem(const ConnectorPoint *handle)
         lastConnectorItem_->updateConnectionPath();
         static_cast<FlowchartShapeItem*>(handle->item())->addConnectorItem(lastConnectorItem_);
 
-        QGraphicsScene::addItem(lastConnectorItem_);
+        emit newConnectorItemAdded(lastConnectorItem_);
 
         lastConnectorItem_ = nullptr;
     }
+}
+
+void Scene::emitResizeInfoToViewUndoStack()
+{
+    auto shapeItem = qobject_cast<FlowchartShapeItem*>(sender());
+    QRectF oldRect = shapeItem->contentRectBeforeResize();
+    QRectF newRect = shapeItem->contentRect();
+    QPointF posBeforeResize = shapeItem->posBeforeResize();
+    QPointF posAfterResize = shapeItem->pos();
+    emit resizeCompleted(shapeItem, oldRect, newRect, posBeforeResize, posAfterResize);
 }
 
 void Scene::addGuideLine(GuideLine *positionLine)
@@ -150,16 +160,17 @@ void Scene::addGuideLine(GuideLine *positionLine)
 void Scene::connectSignalsOfShapeItem(FlowchartShapeItem *item)
 {
     connect(item, &FlowchartShapeItem::moved,                  this, &Scene::onItemMoved);
-    connect(item, &FlowchartShapeItem::resizedByHands,         this, &Scene::onItemResizedByHands);
+    connect(item, &FlowchartShapeItem::resizedByUser,          this, &Scene::onItemResizedByHands);
     connect(item, &FlowchartShapeItem::selected,               this, &Scene::bringToFront);
-    connect(item, &FlowchartShapeItem::pressed,                this, &Scene::saveClickedItemInfo);
+    connect(item, &FlowchartShapeItem::pressed,                this, &Scene::savePressedItemInfo);
     connect(item, &FlowchartShapeItem::released,               this, &Scene::deleteAllGuidelines);
     connect(item, &FlowchartShapeItem::released,               this, &Scene::onItemReleased);
     connect(item, &FlowchartShapeItem::selected,               this, &Scene::itemSelected);
     connect(item, &FlowchartShapeItem::moved,                  this, &Scene::itemMoved);
     connect(item, &FlowchartShapeItem::lostSelection,          this, &Scene::itemLostSelection);
     connect(item, &FlowchartShapeItem::resizeHandleReleased,   this, &Scene::deleteAllGuidelines);
-    connect(item, &FlowchartShapeItem::connectorPointPressed, this, &Scene::doConnectorItem);
+    connect(item, &FlowchartShapeItem::resizeHandleReleased,   this, &Scene::emitResizeInfoToViewUndoStack);
+    connect(item, &FlowchartShapeItem::connectorPointPressed,  this, &Scene::doConnectorItem);
 }
 
 void Scene::connectSignalsOfTextItem(FlowchartTextItem *textItem)
@@ -174,7 +185,7 @@ void Scene::connectSignalsOfTextItem(FlowchartTextItem *textItem)
             this,     &Scene::switchedToAnotherTextItem);
 
     connect(textItem, &FlowchartTextItem::pressed,
-            this,     &Scene::saveClickedItemInfo);
+            this,     &Scene::savePressedItemInfo);
 
     connect(textItem, &FlowchartTextItem::released,
             this,     &Scene::onItemReleased);

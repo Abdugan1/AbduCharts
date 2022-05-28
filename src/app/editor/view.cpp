@@ -2,6 +2,7 @@
 #include "editor/scene.h"
 #include "editor/items/flowchartshapeitems.h"
 #include "editor/items/flowcharttextitems.h"
+#include "editor/connectoritem.h"
 #include "editor/grid.h"
 #include "ui/shapeitemdrag.h"
 #include "editor/undo_commands/undocommands.h"
@@ -147,7 +148,25 @@ void View::dropEvent(QDropEvent *event)
 
 void View::addToUndoStackMoveCommand(QGraphicsItem *item, const QPointF &oldPos)
 {
-    undoStack_->push(new MoveCommand(item, oldPos));
+    if (auto shapeItem = dynamic_cast<FlowchartShapeItem*>(item)) {
+        undoStack_->push(MoveCommand::fromShapeItem(shapeItem, oldPos));
+    } else if (auto textItem = dynamic_cast<FlowchartTextItem*>(item)) {
+        undoStack_->push(MoveCommand::fromTextItem(textItem, oldPos));
+    }
+}
+
+void View::addToUndoStackAddConnectorCommand(ConnectorItem *connectorItem)
+{
+    undoStack_->push(AddCommand::fromConnectorItem(connectorItem, scene_));
+}
+
+void View::addToUndoStackResizeCommand(FlowchartShapeItem *resizedItem,
+                                       const QRectF &oldRect,
+                                       const QRectF &newRect,
+                                       const QPointF &posBeforeResize,
+                                       const QPointF &posAfterResize)
+{
+    undoStack_->push(new ResizeCommand(resizedItem, oldRect, newRect, posBeforeResize, posAfterResize));
 }
 
 void View::updateGridColor(const QColor &color)
@@ -187,6 +206,8 @@ void View::deleteSelectedItem()
             deleteCommand = DeleteCommand::fromShapeItem(shapeItem, scene_);
         } else if (auto textItem = dynamic_cast<FlowchartTextItem*>(selectedItem)) {
             deleteCommand = DeleteCommand::fromTextItem(textItem, scene_);
+        } else if (auto connectorItem = dynamic_cast<ConnectorItem*>(selectedItem)) {
+            deleteCommand = DeleteCommand::fromConnectorItem(connectorItem, scene_);
         }
 
         if (deleteCommand)

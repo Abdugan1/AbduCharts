@@ -9,7 +9,7 @@ FlowchartShapesTextItem::FlowchartShapesTextItem(FlowchartShapeItem *parent)
     : FlowchartTextItem(parent)
     , myItem_(parent)
 {
-    connect(parent, &FlowchartShapeItem::resizedByHands, this, &FlowchartShapesTextItem::centerOnShapeItem);
+    connect(parent, &FlowchartShapeItem::resizedByUser, this, &FlowchartShapesTextItem::centerOnShapeItem);
     connect(document(), &QTextDocument::contentsChanged, this, &FlowchartShapesTextItem::centerOnShapeItem);
 
     centerOnShapeItem();

@@ -15,12 +15,20 @@ void ItemResizer::setCompareRect(const QRectF &newCompareRect)
     compareRect_ = newCompareRect;
 }
 
+void ItemResizer::resize(const QRectF &newRect)
+{
+    oldCompareRect_ = compareRect_;
+    compareRect_ = newRect;
+    if (compareRect_ != oldCompareRect_)
+        doResize();
+}
+
 void ItemResizer::onHandleMoved(ResizeHandle *resizeHandle, qreal dx, qreal dy)
 {
     updateCompareRect(resizeHandle, dx, dy);
     if (compareRect_ != oldCompareRect_) {
         doResize();
-        emit resizeBeenMade(oldCompareRect_, compareRect_);
+        emit resizeBeenMadeByUser(oldCompareRect_, compareRect_);
     }
 }
 

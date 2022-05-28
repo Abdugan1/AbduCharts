@@ -56,6 +56,12 @@ void ResizeHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     }
 }
 
+void ResizeHandle::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    ShapeItemBase::mousePressEvent(event);
+    emit pressed();
+}
+
 void ResizeHandle::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
     ShapeItemBase::mouseReleaseEvent(event);

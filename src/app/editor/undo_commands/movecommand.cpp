@@ -1,27 +1,56 @@
 #include "movecommand.h"
-#include <QGraphicsItem>
+#include "moveshapecommand.h"
+#include "movetextcommand.h"
 
 #include <QDebug>
 
-MoveCommand::MoveCommand(QGraphicsItem* shapeItem, const QPointF& oldPos)
-    : item_(shapeItem)
-    , oldPos_(oldPos)
-    , newPos_(shapeItem->pos())
+MoveCommand::MoveCommand(QUndoCommand *parent)
+    : QUndoCommand(parent)
 {
 }
 
-void MoveCommand::undo()
+MoveCommand *MoveCommand::fromShapeItem(FlowchartShapeItem *shapeItem, const QPointF &oldPos)
 {
-    qDebug() << "MoveCommand: undo";
-    item_->setFlag(QGraphicsItem::ItemSendsGeometryChanges, false);
-    item_->setPos(oldPos_);
-    item_->setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
+    return new MoveShapeCommand(shapeItem, oldPos);
 }
 
-void MoveCommand::redo()
+MoveCommand *MoveCommand::fromTextItem(FlowchartTextItem *textItem, const QPointF &oldPos)
 {
-    qDebug() << "MoveCommand: redo";
-    item_->setFlag(QGraphicsItem::ItemSendsGeometryChanges, false);
-    item_->setPos(newPos_);
-    item_->setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
+    return new MoveTextCommand(textItem, oldPos);
 }
+
+QPointF MoveCommand::oldPos() const
+{
+    return oldPos_;
+}
+
+void MoveCommand::setOldPos(QPointF newOldPos)
+{
+    oldPos_ = newOldPos;
+}
+
+QPointF MoveCommand::newPos() const
+{
+    return newPos_;
+}
+
+void MoveCommand::setNewPos(QPointF newNewPos)
+{
+    newPos_ = newNewPos;
+}
+
+//void MoveCommand::undo()
+//{
+//    qDebug() << "MoveCommand: undo";
+//    item_->setFlag(QGraphicsItem::ItemSendsGeometryChanges, false);
+//    item_->setPos(oldPos_);
+//    item_->setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
+//}
+
+//void MoveCommand::redo()
+//{
+//    qDebug() << "MoveCommand: redo";
+//    item_->setFlag(QGraphicsItem::ItemSendsGeometryChanges, false);
+//    item_->setPos(newPos_);
+//    item_->setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
+//}

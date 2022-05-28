@@ -6,6 +6,7 @@
 #include "editor/view.h"
 #include "editor/items/flowchartshapeitem.h"
 #include "editor/items/flowcharttextitem.h"
+#include "editor/connectoritem.h"
 
 #include <QTextCursor>
 #include <QMenuBar>
@@ -94,6 +95,12 @@ void MainWindow::initConnections()
 
     connect(scene_, &Scene::itemMovedAndReleased,
             view_,  &View::addToUndoStackMoveCommand);
+
+    connect(scene_, &Scene::newConnectorItemAdded,
+            view_,  &View::addToUndoStackAddConnectorCommand);
+
+    connect(scene_, &Scene::resizeCompleted,
+            view_,  &View::addToUndoStackResizeCommand);
 
     // View connect
     connect(view_,          &View::scaleChanged,

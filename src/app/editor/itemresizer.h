@@ -16,8 +16,10 @@ public:
 
     void setCompareRect(const QRectF &newCompareRect);
 
+    void resize(const QRectF& newRect);
+
 signals:
-    void resizeBeenMade(const QRectF& oldRect, const QRectF& currentRect);
+    void resizeBeenMadeByUser(const QRectF& oldRect, const QRectF& currentRect);
 
 public slots:
     void onHandleMoved(ResizeHandle* resizeHandle, qreal dx, qreal dy);

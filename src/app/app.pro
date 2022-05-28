@@ -43,6 +43,9 @@ SOURCES += \
     editor/undo_commands/deleteshapecommand.cpp \
     editor/undo_commands/deletetextcommand.cpp \
     editor/undo_commands/movecommand.cpp \
+    editor/undo_commands/moveshapecommand.cpp \
+    editor/undo_commands/movetextcommand.cpp \
+    editor/undo_commands/resizecommand.cpp \
     editor/view.cpp \
     main.cpp \
     ui/bottomtoolbar.cpp \
@@ -88,6 +91,9 @@ HEADERS += \
     editor/undo_commands/deleteshapecommand.h \
     editor/undo_commands/deletetextcommand.h \
     editor/undo_commands/movecommand.h \
+    editor/undo_commands/moveshapecommand.h \
+    editor/undo_commands/movetextcommand.h \
+    editor/undo_commands/resizecommand.h \
     editor/undo_commands/undocommands.h \
     editor/view.h \
     ui/bottomtoolbar.h \

@@ -5,6 +5,7 @@
 
 class Scene;
 class FlowchartShapeItem;
+class ConnectorItem;
 class QUndoStack;
 
 class QLabel;
@@ -34,6 +35,12 @@ protected:
 
 public slots:
     void addToUndoStackMoveCommand(QGraphicsItem* item, const QPointF& oldPos);
+    void addToUndoStackAddConnectorCommand(ConnectorItem* connectorItem);
+    void addToUndoStackResizeCommand(FlowchartShapeItem* resizedItem,
+                                     const QRectF& oldRect,
+                                     const QRectF& newRect,
+                                     const QPointF& posBeforeResize,
+                                     const QPointF& posAfterResize);
 
     void updateGridColor(const QColor& color);
 

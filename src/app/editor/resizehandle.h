@@ -30,10 +30,12 @@ public:
 
 signals:
     void moved(ResizeHandle* resizeHandle, qreal dx, qreal dy);
+    void pressed();
     void released();
 
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+    void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 
 private:

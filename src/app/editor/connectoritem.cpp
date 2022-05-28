@@ -4,6 +4,7 @@
 #include "libroute/orthogonalconnector.h"
 
 #include <QPainter>
+#include <QStyleOptionGraphicsItem>
 #include <QGraphicsScene>
 #include <QDebug>
 
@@ -23,7 +24,7 @@ QPointF getConnectionPoint(const QRectF &itemBoundingRect, ConnectionSide side)
 ConnectorItem::ConnectorItem(QGraphicsItem *parent)
     : ShapeItemBase(parent)
 {
-
+    setFlag(ItemIsSelectable, true);
 }
 
 ConnectorItem::~ConnectorItem()
@@ -52,6 +53,8 @@ void ConnectorItem::paint(QPainter *painter,
 {
     Q_UNUSED(option)
     Q_UNUSED(widget)
+
+    painter->setPen(option->state & QStyle::State_Selected ? Qt::green : Qt::black);
 
     for (const auto& line : qAsConst(connectionPath_))
         painter->drawLine(line);

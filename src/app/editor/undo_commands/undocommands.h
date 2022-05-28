@@ -4,5 +4,6 @@
 #include "addcommand.h"
 #include "movecommand.h"
 #include "deletecommand.h"
+#include "resizecommand.h"
 
 #endif // UNDOCOMMANDS_H
