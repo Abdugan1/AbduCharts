@@ -18,7 +18,7 @@
 
 const QString CursorPositionText            = QObject::tr("Cursor position: (%1, %2)");
 const QString SelectedItemPositionText      = QObject::tr("Item position: (%1, %2)");
-const QString SelectedItemFigureTypeText    = QObject::tr("Figure type: %1");
+const QString SelectedItemFigureTypeText    = QObject::tr("TO REMOVE!!!");
 
 const qreal MaxScale  = 10.0;
 const qreal MinScale  = 0.25;
